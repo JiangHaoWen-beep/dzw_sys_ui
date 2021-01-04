@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>维修单</title>
+		<!--<link rel="stylesheet" type="text/css" href="../css/element.css" />-->
+		<style type="text/css">
+			.el-form {
+				width: 80%;
+			}
+			
+			.el-form-item {
+				width: 200px;
+			}
+			
+			#repairBill {
+				zoom: 0.9;
+			}
+			
+			.el-tabs {
+				width: 85%;
+			}
+			
+			.hiddenContent {
+				opacity: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="repairBill">
+			<h1>
+						维修单
+					<el-button type="success" icon="el-icon-check" circle></el-button>
+					<el-button type="text" @click="checkTestOnCompletion">竣工检验</el-button>
+					<el-dialog title="竣工检验" :close-on-click-modal="false" :visible.sync="isShowTwo" width="80%">
+								<div id="showTwo"></div>
+					</el-dialog>
+			</h1>
+			<el-form :inline="true" :model="RepairBill" :disabled="true" class="demo-form-inline">
+				<el-form-item label="单号">
+					<el-input v-model="RepairBill.roddnumber" placeholder="单号"></el-input>
+				</el-form-item>
+				<el-form-item label="车牌号">
+					<el-input v-model="RepairBill.carnumbers" placeholder="车牌号"></el-input>
+				</el-form-item>
+				<el-form-item label="车架号">
+					<el-input v-model="RepairBill.vin" placeholder="车架号"></el-input>
+				</el-form-item>
+				<el-form-item label="车型">
+					<el-input v-model="RepairBill.cartype" placeholder="车型"></el-input>
+				</el-form-item>
+				<el-form-item label="车辆品牌">
+					<el-input v-model="RepairBill.bland" placeholder="车辆品牌"></el-input>
+				</el-form-item>
+				<el-form-item label="发动机号">
+					<el-input v-model="RepairBill.enginenumber" placeholder="发动机号"></el-input>
+				</el-form-item>
+				<el-form-item label="发动机品牌">
+					<template>
+						<el-select v-model="RepairBill.enginebrand" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in engineBrands" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="服务顾问">
+					<el-input v-model="RepairBill.server" placeholder="服务顾问"></el-input>
+				</el-form-item>
+				<el-form-item label="车主名称">
+					<el-input v-model="RepairBill.carownname" placeholder="车主名称"></el-input>
+				</el-form-item>
+				<el-form-item label="驾驶员">
+					<el-input v-model="RepairBill.driver" placeholder="驾驶员"></el-input>
+				</el-form-item>
+				<el-form-item label="联系电话">
+					<el-input v-model="RepairBill.phone" placeholder="联系电话"></el-input>
+				</el-form-item>
+				<el-form-item label="进厂里程">
+					<el-input v-model="RepairBill.milesintothefactory" placeholder="进厂里程"></el-input>
+				</el-form-item>
+				<el-form-item label="进厂油量">
+					<el-input v-model="RepairBill.oilintothefactory" placeholder="进厂油量"></el-input>
+				</el-form-item>
+				<el-form-item label="上次里程">
+					<el-input v-model="RepairBill.thelasttimetheMileage" placeholder="上次里程"></el-input>
+				</el-form-item>
+				<el-form-item label="进厂时间">
+					<el-input v-model="RepairBill.timeintothefactory" placeholder="上次里程"></el-input>
+				</el-form-item>
+				<el-form-item label="业务类别">
+					<template>
+						<el-select v-model="RepairBill.classofbusiness" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in classOfBusinesses" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="施工班次">
+					<template>
+						<el-select v-model="RepairBill.constructiondivisions" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in constructionDivisionsList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="接车人">
+					<el-input v-model="RepairBill.pickone" placeholder="接车人"></el-input>
+				</el-form-item>
+				<el-form-item label="预计完工">
+					<!--<el-input v-model="RepairBill.expectedcompletion" placeholder="预计完工"></el-input>-->
+					<div class="block">
+						<el-date-picker v-model="RepairBill.expectedcompletion" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+						</el-date-picker>
+					</div>
+				</el-form-item>
+				<el-form-item label="结算方式">
+					<el-input v-model="RepairBill.clearingform" placeholder="结算方式"></el-input>
+				</el-form-item>
+				<el-form-item label="赔款公司">
+					<el-input v-model="RepairBill.indemnitycompany" placeholder="赔款公司"></el-input>
+				</el-form-item>
+				<el-form-item label="完工时间">
+					<!--<el-input v-model="RepairBill.timeofcompletion" placeholder="完工时间"></el-input>-->
+					<div class="block">
+						<el-date-picker v-model="RepairBill.timeofcompletion" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+						</el-date-picker>
+					</div>
+				</el-form-item>
+				<el-form-item label="上次进厂">
+					<!--<el-input v-model="RepairBill.thelasttimeintothefactory" placeholder="上次进厂"></el-input>-->
+					<div class="block">
+						<el-date-picker v-model="RepairBill.thelasttimeintothefactory" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+						</el-date-picker>
+					</div>
+				</el-form-item>
+				<el-form-item label="预估金额">
+					<el-input v-model="RepairBill.estimatedamount" placeholder="预估金额"></el-input>
+				</el-form-item>
+				<br />
+				<el-form-item label="接待备注">
+					<el-input v-model="RepairBill.receptionnote" placeholder="接待备注" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+				<br />
+				<el-form-item label="维修陈述">
+					<el-input v-model="RepairBill.repairstatement" placeholder="维修陈述" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+			</el-form>
+			<el-tabs v-model="activeName" style="width: 120%">
+				<el-tab-pane label="维修项目" name="first">
+					<el-button type="text" @click="addMaintenanceItemInfo">新增</el-button>
+					<el-input v-model="removeOID" placeholder="移除oid" style="width: 80px;"></el-input>
+					<el-button type="text" @click="removeMaintenanceItemInfo">删除</el-button>
+					<span>总金额：{{totalSum}}</span>
+					<el-dialog title="新增项目维修" :close-on-click-modal="false" :visible.sync="isShow" width="80%">
+						<div id="show"></div>
+					</el-dialog>
+					<el-table ref="multipleTable" :data="MaintenanceItems" @row-click="modifyMaintenanceItemInfo" tooltip-effect="dark">
+						<el-table-column prop="oid" label="项目编号">
+						</el-table-column>
+						<el-table-column prop="oname" label="项目名称" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="number" label="数量" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="priceclass" label="价类" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="unitprice" label="单价" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="money" label="金额" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="settlementprice" label="技师结算价" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="errordesc" label="故障描述" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="errorcause" label="故障原因" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="themaintenancecrew" label="维修班组" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="busyworkgroup" label="作业人员" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="server" label="服务顾问" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="workordernumber" label="工单号" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="freeofchargefor" label="免单原因" show-overflow-tooltip>
+						</el-table-column>
+					</el-table>
+				</el-tab-pane>
+				<!--<el-tab-pane label="结算信息" name="third">
+					<el-table ref="multipleTable" :data="BillingInfo" tooltip-effect="dark" style="width: 100%">
+						<el-table-column type="selection" width="55">
+						</el-table-column>
+						<el-table-column prop="bStatic" label="结算状态">
+						</el-table-column>
+						<el-table-column prop="bMoney" label="结算金额" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="materialsExpenses" label="材料费" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="costOfLabor" label="工时费" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="bDate" label="结算日期" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="bMan" label="结算人" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="cash" label="现金" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="bankCard" label="银行卡" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="bill" label="票据" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="paymentOfTheAmount" label="挂账金额" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="atTheCards" label="冲储值卡" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="atTheDeposit" label="冲定金" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="collectTaxes" label="收税金" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="invoiceNumber" label="发票号" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="internalAccount" label="内部帐" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="pointsDeduction" label="积分抵扣" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="toAccountProfitAndLoss" label="到账盈亏" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="TypeOfInvoice" label="发票种类" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="invoiceValue" label="发票金额" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="vouchers" label="抵用卷" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="wipeTheMantissa" label="抹尾数" show-overflow-tooltip>
+						</el-table-column>
+					</el-table>
+				</el-tab-pane>-->
+			</el-tabs>
+			</template>
+			</el-form>
+		</div>
+		</div>
+	</body>
+	<!--<script src="../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/element.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios_cfg.js" type="text/javascript" charset="utf-8"></script>-->
+	<script type="text/javascript">
+		var repairBill = new Vue({
+			el: "#repairBill",
+			data() {
+				return {
+					RepairBill: {
+						roddnumber: "",
+						carnumbers: "",
+						vin: "",
+						cartype: "",
+						bland: "",
+						enginenumber: "",
+						enginebrand: "",
+						server: "",
+						carownname: "",
+						driver: "",
+						phone: "",
+						milesintothefactory: "",
+						oilintothefactory: "",
+						thelasttimethemileage: "",
+						timeintothefactory: "",
+						classofbusiness: "",
+						constructiondivisions: "",
+						pickone: "",
+						expectedcompletion: "",
+						clearingform: "",
+						indemnitycompany: "",
+						timeofcompletion: "",
+						thelasttimeintothefactory: "",
+						estimatedamount: "",
+						receptionnote: "",
+						repairstatement: ""
+					},
+					engineBrands: [{
+						values: "brand01",
+						name: "品牌一"
+					}, {
+						values: "brand02",
+						name: "品牌二"
+					}, {
+						values: "brand03",
+						name: "品牌三"
+					}],
+					classOfBusinesses: [{
+						values: "business01",
+						name: "业务一"
+					}, {
+						values: "business02",
+						name: "业务二"
+					}, {
+						values: "business03",
+						name: "业务三"
+					}],
+					constructionDivisionsList: [{
+						values: "divisions01",
+						name: "早上"
+					}, {
+						values: "divisions02",
+						name: "中午"
+					}, {
+						values: "divisions03",
+						name: "晚上"
+					}],
+					activeName: 'first',
+					MaintenanceItems: [],
+					AcquisitionConditions: [],
+					BillingInfo: [],
+					isShow: false,
+					removeOID: "",
+					isShowTwo: false,
+					totalSum:""
+				}
+			},
+			methods: {
+				getRepairBillInfosByrOddNum() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/repairBill/${this.RepairBill.roddnumber}`).then(function(success) {
+						_This.RepairBill = success.data;
+						console.log(JSON.stringify(_This.RepairBill));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				getmaintenanceItemInfosByWorkOrderNum() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/${this.RepairBill.roddnumber}`).then(function(success) {
+						_This.MaintenanceItems = success.data;
+						//_This.$alert(JSON.stringify(_This.MaintenanceItems));
+						_This.MaintenanceItems.forEach(function(i,obj){
+							_This.totalSum = parseInt(i.money) + parseInt(i.money);
+						});
+						//totalCount = parseInt();
+						//_This.$alert(_This.totalSum);
+						sessionStorage.setItem("totalSum", _This.totalSum);
+						console.log(JSON.stringify(_This.MaintenanceItems));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				addMaintenanceItemInfo() {
+					this.isShow = true;
+					//解决预加载问题
+					this.$nextTick(() => {
+						$("#show").load('../CWL/addMaintenanceItem.html');
+					})
+				},
+				modifyMaintenanceItemInfo(index) {
+					//this.$alert(JSON.stringify(index));
+					sessionStorage.setItem("indexObject", JSON.stringify(index));
+					//this.$alert(sessionStorage.getItem("indexObject"));
+					this.isShow = true;
+					//解决预加载问题
+					this.$nextTick(() => {
+						$("#show").load('../CWL/modifyMaintenanceItem.html');
+					})
+				},
+				removeMaintenanceItemInfo() {
+					let _This = this;
+					axios.delete(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/${this.removeOID}`).then(function(success) {
+						if(success.data == 1) {
+							_This.$alert("success");
+							_This.getmaintenanceItemInfosByWorkOrderNum();
+							_This.removeOID = "";
+						} else {
+							_This.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				checkTestOnCompletion() {
+					this.isShowTwo = true;
+					//解决预加载问题
+					this.$nextTick(() => {
+						$("#showTwo").load('../CWL/checkTestOnCompletion.html');
+					})
+				}
+
+			},
+			mounted() {
+				this.RepairBill.roddnumber = sessionStorage.getItem("repairOrder");
+				this.getRepairBillInfosByrOddNum();
+				this.getmaintenanceItemInfosByWorkOrderNum();
+			}
+		});
+	</script>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<div class="container" id="xzlz">
+			<div class="row">
+				<div class="col-md-12">
+					<template>
+						部门：<el-select v-model="person.ymentid" placeholder="请选择" @change="queryll">
+							<el-option v-for="(temp,i) in tableData" :value="temp.bid" :label="temp.bname">
+							</el-option>
+						</el-select>
+						员工：<el-select v-model="person.yname" placeholder="请选择">
+							<el-option v-for="(temp,i) in tableData1" :value="temp.yname" :label="temp.yname">
+							</el-option>
+						</el-select>
+					</template>
+					<br/>
+					原因：<el-input v-model="person.lreason" placeholder="请输入内容"></el-input>
+					<el-button @click="addPerson" type="primary">提交</el-button>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		var xzlz = new Vue({
+			data() {
+				return {
+					person: {},
+					tableData: {},
+					tableData1: {}
+				}
+			},
+			methods: {
+				query() {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/ww`).then(function(resp) {
+						_this.tableData = resp.data;
+					})
+				},
+				queryll(ymentid) {
+					let _this = this;
+					//var ymentid = this.person.ymentid;
+					//alert(ymentid)
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/xzlz/${ymentid}`).then(function(resp) {
+						_this.tableData1 = resp.data;
+					})
+				},
+				addPerson() {
+					let _this = this;
+					//this.$alert(this.person)
+					axios.put(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/jl/${this.person.lreason}/${this.person.ymentid}/${this.person.yname}`).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '离职成功',
+								type: 'success'
+							})
+							ppp.isShow = false;
+							ppp.goToPage(1,3);
+						}
+					}).catch(function(e) {});
+				}
+			},
+			mounted() {
+				this.query();
+				this.queryll();
+			}
+
+		}).$mount("#xzlz");
+	</script>
+
+</html>

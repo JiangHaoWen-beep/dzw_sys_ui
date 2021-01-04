@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>人事-岗位定义</title>
+		<!--<link rel="stylesheet" href="../../css/index.css" />-->
+	</head>
+
+	<body>
+		<div id="ppps" class="pb">
+			<el-container>
+				<el-main>
+					<template>
+						<el-row :gutter="20">
+							<el-col align="center">
+								岗位名称：<input v-model="person.zname" placeholder="名称" type="text" />
+								<el-button @click="addPerson()" type="primary" size="mini">新增</el-button>
+								<el-button @click="updatePerson" type="warning" size="mini">修改</el-button>
+								<el-button @click="deletecs(person.zid)" type="danger" size="mini">删除</el-button>
+							</el-col>
+						</el-row>
+						<el-table @current-change="fuzhi" align="center" ref="singleTable" :data="tableData1.list" highlight-current-row @current-change="handleCurrentChange" @row-click="ww">
+							<el-table-column label="序号" type="index" width="300">
+								<template slot-scope="temp">
+									{{temp.$index+1}}
+								</template>
+							</el-table-column>
+							<el-table-column property="zid" label="岗位编号" width="320">
+								<template slot-scope="temp">
+									{{temp.row.zid}}
+								</template>
+							</el-table-column>
+							<el-table-column property="zname" label="岗位名称" width="320">
+								<template slot-scope="temp">
+									{{temp.row.zname}}
+								</template>
+							</el-table-column>
+						</el-table>
+						<br />
+						<div class="block">
+							<el-pagination :current-page="tableData1.pageNum" @current-change="handleCurrentChange" :page-size="3" layout="total, prev, pager, next" :total=tableData1.total>
+							</el-pagination>
+						</div>
+					</template>
+				</el-main>
+			</el-container>
+			</el-container>
+		</div>
+	</body>
+	<script>
+		var id1 = 0;
+		var ppp = new Vue({
+			data() {
+				return {
+					dialogImageUrl: '',
+					dialogVisible: false,
+					person: {
+						zid: '',
+						zname: ''
+					},
+					tableData1: {},
+					currentRow: null
+
+				}
+			},
+			methods: {
+				closePage() {
+					myAuction.isAddShow = false;
+				},
+				setCurrent(row) {
+					this.$refs.singleTable.setCurrentRow(row);
+				},
+				handleCurrentChange(val) {
+					this.toPerson(val, this.tableData1.pageSize);
+				},
+				addPerson() {
+					let _this = this;
+					axios.post("http://127.0.0.1:8080/dzw_sys/ty/api/postb/xz", this.person).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '新增成功',
+								type: 'success'
+							})
+							_this.toPerson(1, 3);
+						}
+					}).catch(function(e) {});
+				},
+				toPerson(p, s) {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/postb/o/${p}/${s}`).then(function(resp) {
+						_this.tableData1 = resp.data;
+					})
+				},
+				fuzhi(currentRow, oldCurrenRow) {
+					ppp.person.zid = currentRow.zid;
+					ppp.person.zname = currentRow.zname;
+				},
+				deletecs(zid) {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/zw/${id1}`).then(function(resp) {
+						if(resp.data > 0) {
+							alert("该职位已有人，不能进行删除")
+						} else {
+							axios.delete(`http://127.0.0.1:8080/dzw_sys/ty/api/postb/hhh/${id1}`).then(function(resp) {
+								if(resp.data.code == "200") {
+									_this.$message({
+										message: '移除成功',
+										type: 'success'
+									})
+									_this.toPerson(1, 3);
+								}
+							}).catch(function(e) {});
+						}
+					}).catch(function(e) {
+						console.info(e);
+					});
+				},
+				updatePerson() {
+					let _this = this;
+					axios.put("http://127.0.0.1:8080/dzw_sys/ty/api/postb/dd/Postb", this.person).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '修改成功',
+								type: 'success'
+							})
+							_this.toPerson(1, 3);
+						}
+					}).catch(function(e) {});
+				},
+				ww(row){
+					id1 = row.zid;
+				}
+			},
+			mounted() {
+				this.toPerson(1, 3);
+			}
+		}).$mount("#ppps");
+	</script>
+
+</html>

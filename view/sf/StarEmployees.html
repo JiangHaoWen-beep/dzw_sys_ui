@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>技工星级</title>
+		<!--<link rel="stylesheet" type="text/css" href="../css/element.css" />-->
+		<style type="text/css">
+			.el-input {
+				width: 130px;
+			}
+			
+			#StarEmployees {
+				zoom: 0.8;
+			}
+			
+			.el-tabs {
+				width: 85%;
+			}
+			
+			.hiddenContent {
+				opacity: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="StarEmployees">
+			<el-form :inline="true" :model="this.starEmployee" class="demo-form-inline">
+				<el-form-item label="等级编码">
+					<el-input v-model="starEmployee.id" placeholder="等级编码"></el-input>
+				</el-form-item>
+				<el-form-item label="星级">
+					<el-input v-model="starEmployee.starLevel" placeholder="星级"></el-input>
+				</el-form-item>
+				<el-form-item label="等级">
+					<el-input v-model="starEmployee.level" placeholder="等级"></el-input>
+				</el-form-item>
+				<el-form-item label="提成权重">
+					<el-input v-model="starEmployee.cutTheWeight" placeholder="提成权重"></el-input>
+				</el-form-item>
+				<el-form-item>
+					<i class="el-icon-edit"></i>
+					<el-button type="text" @click="addStarEmployeesInfos">增加</el-button>
+					<i class="el-icon-close"></i>
+					<el-button type="text" @click="removeStarEmployeesInfos">删除</el-button>
+					<i class="el-icon-check"></i>
+					<el-button type="text" @click="modifyStarEmployeesInfos">保存</el-button>
+				</el-form-item>
+			</el-form>
+			<template>
+				<el-table :data="starEmployees" @row-click="getIndex" style="width: 65%">
+
+					<el-table-column prop="id" label="等级编码" width="180">
+					</el-table-column>
+					<el-table-column prop="starlevel" label="星级" width="180">
+					</el-table-column>
+					<el-table-column prop="level" label="等级">
+					</el-table-column>
+					<el-table-column prop="cuttheweight" label="提成权重">
+					</el-table-column>
+
+					<!--<el-table-column label="">
+						<template slot-scope="scope">
+							<input type="radio" @click="getIndex(scope.row)" name="radio" />
+						</template>
+					</el-table-column>-->
+
+				</el-table>
+			</template>
+		</div>
+	</body>
+	<!--<script src="../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/element.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios_cfg.js" type="text/javascript" charset="utf-8"></script>-->
+	<script type="text/javascript">
+		var StarEmployees = new Vue({
+			el: "#StarEmployees",
+			data() {
+				return {
+					starEmployee: {
+						id: '',
+						starLevel: '',
+						level: "",
+						cutTheWeight: ""
+					},
+					starEmployees: [],
+					indexID: ""
+				}
+			},
+			methods: {
+				getStarEmployeesInfos() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/starEmployees/queryAll`).then(function(success) {
+						_This.starEmployees = success.data;
+						console.log(JSON.stringify(_This.starEmployees));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				getIndex(index) {
+					/*this.$alert(JSON.stringify(index));*/
+					this.starEmployee.id = index.id;
+					this.starEmployee.starLevel = index.starlevel;
+					this.starEmployee.level = index.level;
+					this.starEmployee.cutTheWeight = index.cuttheweight;
+					this.indexID = index.id;
+				},
+				addStarEmployeesInfos() {
+					if(this.starEmployee.id == this.indexID) {
+						this.$alert("id is Already Exist");
+						return false;
+					}
+					let _this = this;
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/starEmployees/saveStarEmployees`, this.starEmployee).then(function(success) {
+						if(success.data.msg == "success") {
+							_this.$alert("success");
+							_this.getStarEmployeesInfos();
+						} else {
+							_this.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				modifyStarEmployeesInfos() {
+					let _this = this;
+					axios.put(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/starEmployees/modifyStarEmployees`, this.starEmployee).then(function(success) {
+						if(success.data.msg == "success") {
+							_this.$alert("success");
+							_this.getStarEmployeesInfos();
+						} else {
+							_this.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				removeStarEmployeesInfos() {
+					let _this = this;
+					axios.delete(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/starEmployees/starEmployee/${this.starEmployee.id}`, ).then(function(success) {
+						if(success.data.msg == "success") {
+							_this.$alert("success");
+							_this.getStarEmployeesInfos();
+						} else {
+							_this.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				}
+			},
+			mounted() {
+				this.getStarEmployeesInfos();
+			}
+		});
+	</script>
+
+</html>

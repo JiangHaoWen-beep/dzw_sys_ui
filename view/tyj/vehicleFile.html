@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>车型档案</title>
+		<style type="text/css">
+			.el-table{
+				margin-top: 20px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="vehicleFile">
+			<el-container>
+				<el-main style="border: solid red 0px;width: 490px;">
+					<template>
+						<el-button type="primary" @click="dialogVisible = true">增加品牌</el-button>
+						<el-input v-model="parameter1" style="width: 220px;" placeholder="匹配 匹配编码/匹配名称/首字母"></el-input>
+						<el-button @click="matchingByVehicleBrand" type="primary">查询</el-button>
+					</template>
+					<template>
+						<el-table :data="vehiclebrand" style="width: 480px" height="250">
+							<el-table-column align="center" prop="vbrandid" label="编码" width="50">
+							</el-table-column>
+							<el-table-column align="center" prop="vbrandname" label="品牌名称" width="120">
+							</el-table-column>
+							<el-table-column align="center" prop="vbrandno" label="首字母" width="80">
+							</el-table-column>
+							<el-table-column align="center" label="操作" width="180">
+								<template slot-scope="scope">
+									<el-button @click="isShow = true;refVehicleBrand(scope.row)" type="primary" icon="el-icon-edit" circle></el-button>
+									<el-button @click="delVehicleBrandById(scope.row.vbrandid)" type="danger" icon="el-icon-delete" circle></el-button>
+									<el-button @click="selPeson(scope.row.vbrandid)" type="success" icon="el-icon-check" circle></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</template>
+				</el-main>
+				<el-main style="border: solid red 0px;width: 510px;">
+					<template>
+						<el-button @click="vehicleAddShow = true" type="primary">增加车型</el-button>
+						<el-input v-model="parameter2" style="width: 220px;" placeholder="匹配 车型编码/车型名称"></el-input>
+						<el-button @click="matchingByVehicleType" type="primary">查询</el-button>
+					</template>
+					<template>
+						<el-table :data="vehicletype" style="width: 660px" height="250">
+							<el-table-column align="center" prop="vtypeno" label="车型ID" width="65">
+							</el-table-column>
+							<el-table-column align="center" prop="enginetypename" label="发动机品牌" width="120">
+							</el-table-column>
+							<el-table-column align="center" prop="vbrandname" label="车辆品牌" width="90">
+							</el-table-column>
+							<el-table-column align="center" prop="vtypename" label="车型名称" width="90">
+							</el-table-column>
+							<el-table-column align="center" prop="vprice" label="参考价格" width="90">
+							</el-table-column>
+							<el-table-column fixed="right" align="center" label="操作" width="155">
+								<template slot-scope="scope">
+									<el-button @click="vehicleUpdateShow = true;refVehicleBrand(scope.row)" type="primary" icon="el-icon-edit" circle></el-button>
+									<el-button @click="delVehicleVehicleType(scope.row.vtypeid)" type="danger" icon="el-icon-delete" circle></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</template>
+				</el-main>
+			</el-container>
+
+			<el-dialog :destroy-on-close="true" @opened="handlByUpdateOpen" :before-close="handleClose" title="车辆品牌信息" :visible.sync="isShow" center>
+				<div id="update"></div>
+			</el-dialog>
+			<el-dialog :destroy-on-close="true" @opened="handlByAddOpen" :before-close="handleClose" title="车辆品牌新增" :visible.sync="dialogVisible" center>
+				<div id="add"></div>
+			</el-dialog>
+			<el-dialog :destroy-on-close="true" @opened="handlByVehicleUpdateOpen" :before-close="handleClose" title="车辆信息" :visible.sync="vehicleUpdateShow" center>
+				<div id="vehicleUpdate"></div>
+			</el-dialog>
+			<el-dialog :destroy-on-close="true" @opened="handlByVehicleAddOpen" :before-close="handleClose" title="车辆新增" :visible.sync="vehicleAddShow" center>
+				<div id="vehicleAdd"></div>
+			</el-dialog>
+		</div>
+	</body>
+
+	<script>
+		var vehicleFile = new Vue({
+			el: "#vehicleFile",
+			data() {
+				return {
+					vehicleAddShow:false,
+					vehicleUpdateShow:false,
+					isShow: false,
+					dialogVisible: false,
+					parameter1: '',
+					parameter2: '',
+					vehiclebrand: [],
+					vehicletype: [],
+					rowConText:[]
+				}
+			},
+			mounted() {
+				_this = this;
+				_this.queryVehicleBrandAll();
+				_this.queryVehicleTypeAll();
+			},
+			methods: {
+				selPeson(vbrandid){
+					let _this=this;
+					console.log(vbrandid);
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicletype/ById/${vbrandid}`).then(function(resp) {
+						console.log(resp);
+						if(resp.data.length > 0) {
+							_this.vehicletype = resp.data;
+						} else {
+							_this.$message.error('没有匹配的相关资源');
+						}
+						//console.log(_this.vehiclebrand);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				
+				refVehicleBrand(ref){
+					let _this=this;
+					console.log(ref);
+					_this.rowConText="";
+					_this.rowConText=ref;
+				},
+				handlByVehicleUpdateOpen(){
+					let _this=this;
+					console.log(_this.rowConText);
+					sessionStorage.setItem("vehicletype",JSON.stringify(_this.rowConText));
+					$("#vehicleUpdate").load('../WZY/vehicleFileUpdate.html');
+				},
+				handlByVehicleAddOpen() {
+					$("#vehicleAdd").load('../WZY/vehicleFileAdd.html');
+				},
+				handlByUpdateOpen(){
+					let _this=this;
+					sessionStorage.setItem("vehiclebrand",JSON.stringify(_this.rowConText));
+					$("#update").load('../WZY/vehicleFileBrandUpdate.html');
+				},
+				handlByAddOpen() {
+					$("#add").load('../WZY/vehicleFileBrandAdd.html');
+				},
+				handleClose(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				//查询所有车辆品牌
+				queryVehicleBrandAll() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehiclebrand`).then(function(resp) {
+						_this.vehiclebrand = resp.data;
+						console.log(_this.vehiclebrand);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				//根据车辆品牌条件查询
+				matchingByVehicleBrand() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehiclebrand/${_this.parameter1}`).then(function(resp) {
+						if(resp.data.length > 0) {
+							_this.vehiclebrand = resp.data;
+						} else {
+							_this.$message.error('没有匹配的相关资源');
+						}
+						console.log(_this.vehiclebrand);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				//品牌删除
+				delVehicleBrandById(vbrandid) {
+					console.log(vbrandid);
+					let _this = this;
+					_this.$confirm('此操作将删除该车辆品牌, 是否继续?', '温馨提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						axios.delete(`http://127.0.0.1:8080/dzw_sys/api/vehiclebrand/del/${vbrandid}`).then(function(resp) {
+							if(resp.data.code == "200") {
+								_this.$message({
+									message: '移除成功!',
+									type: 'success'
+								});
+								_this.queryVehicleBrandAll();
+							} else {
+								_this.$message({
+									message: '移除失败!',
+									type: 'error'
+								});
+							}
+						}).catch(function(e) {
+							console.info(e);
+						})
+					}).catch(() => {
+						_this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				},
+
+				//查询所有车辆
+				queryVehicleTypeAll() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicletype`).then(function(resp) {
+						_this.vehicletype = resp.data;
+						console.log(_this.vehicletype);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				//根据车辆条件查询
+				matchingByVehicleType() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicletype/${_this.parameter2}`).then(function(resp) {
+						if(resp.data.length > 0) {
+							_this.vehicletype = resp.data;
+						} else {
+							_this.$message.error('没有匹配的相关资源');
+						}
+						console.log(_this.vehicletype);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				//车辆删除
+				delVehicleVehicleType(vtypeid) {
+					let _this = this;
+					_this.$confirm('此操作将删除该车辆, 是否继续?', '温馨提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						axios.delete(`http://127.0.0.1:8080/dzw_sys/api/vehicletype/del/${vtypeid}`).then(function(resp) {
+							if(resp.data.code == "200") {
+								_this.$message({
+									message: '移除成功!',
+									type: 'success'
+								});
+								_this.queryVehicleTypeAll();
+							} else {
+								_this.$message({
+									message: '移除失败!',
+									type: 'error'
+								});
+							}
+						}).catch(function(e) {
+							console.info(e);
+						})
+					}).catch(() => {
+						_this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				}
+			}
+		});
+	</script>
+
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>竣工检验</title>
+		<!--<link rel="stylesheet" type="text/css" href="../css/element.css" />-->
+		<style type="text/css">
+			.el-input {
+				width: 200px;
+			}
+			
+			#testOnCompletion {
+				zoom: 0.8;
+			}
+			
+			.hiddenContent {
+				opacity: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="testOnCompletion">
+			<div>
+				<h1>竣工检验   <el-button type="danger" size="small" @click="add">维修开单</el-button></h1>
+				<el-dialog title="维修开单" :visible.sync="isShow" width="80%">
+							<div id="show"></div>
+				</el-dialog>
+				<span class="demonstration">开单日期</span>
+				<el-date-picker v-model="startTime" :popper-append-to-body="false" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择开始时间">
+				</el-date-picker>
+				<el-date-picker v-model="endTime" :popper-append-to-body="false" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择结束时间">
+				</el-date-picker>
+				<span class="demonstration">维修单号</span>
+				<el-input v-model="repairOrder" placeholder="维修单号"></el-input>
+				<br />
+				<br />
+				<span class="demonstration">单据状态</span>
+				<template>
+					<el-select v-model="theDocumentsState" placeholder="请选择" :popper-append-to-body="false">
+						<el-option v-for="item in theDocumentsStates" :key="item.values" :label="item.name" :value="item.values">
+						</el-option>
+					</el-select>
+				</template>
+				<span class="demonstration">车牌号</span>
+				<el-input v-model="licensePlateNumber" placeholder="车牌号"></el-input>
+				<span class="demonstration">车架号</span>
+				<el-input v-model="VIN" placeholder="车架号"></el-input>
+				<button @click="getTestOnCompletionInfos">查询</button>
+			</div>
+			<div>
+				<el-table ref="multipleTable" :data="this.testOnCompletions" @row-click="getIndex" tooltip-effect="dark" style="width: 100%">
+					<el-table-column prop="repairorder" label="维修单号">
+					</el-table-column>
+					<el-table-column prop="typeofdocument" label="单据类型" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="businesstype" label="业务类型" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="constructiondivisions" label="施工班次" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="ownername" label="车主姓名" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="licenseplatenumber" label="车牌号" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="cartype" label="车型" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="vin" label="车架号" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="pickupcartime" label="接车时间" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="expectedcompletion" label="预计完工" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="timeofcompletion" label="完工时间" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="delaysreason" label="误工原因" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="numberofrework" label="返工数" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="penaltyamount" label="处罚金额" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="reworkreason" label="返工原因" show-overflow-tooltip>
+					</el-table-column>
+					<el-table-column prop="thedocumentsstate" label="完成状态" show-overflow-tooltip>
+					</el-table-column>
+				</el-table>
+			</div>
+		</div>
+	</body>
+	<!--<script src="../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/element.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios_cfg.js" type="text/javascript" charset="utf-8"></script>-->
+	<script type="text/javascript">
+		var testOnCompletion = new Vue({
+			el: "#testOnCompletion",
+			data() {
+				return {
+					startTime: "请选择",
+					endTime: "请选择",
+					repairOrder: "请输入",
+					theDocumentsState: "请选择",
+					theDocumentsStates: [{
+						values: "states01",
+						name: "状态一"
+					}, {
+						values: "states02",
+						name: "状态二"
+					}, {
+						values: "states03",
+						name: "状态三"
+					}],
+					licensePlateNumber: "请输入",
+					VIN: "请输入",
+					testOnCompletions: [],
+					isShow:false
+				}
+			},
+			methods: {
+				getTestOnCompletionInfos() {
+					if(this.repairOrder == '') {
+						this.repairOrder = "请输入";
+					}
+					if(this.licensePlateNumber == '') {
+						this.licensePlateNumber = "请输入";
+					}
+					if(this.VIN) {
+						this.VIN = "请输入";
+					}
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/testOnCompletion/queryByCondition/${this.startTime}/${this.endTime}/${this.repairOrder}/${this.theDocumentsState}/${this.licensePlateNumber}/${this.VIN}`).then(function(success) {
+						_This.testOnCompletions = success.data;
+						console.log(JSON.stringify(_This.testOnCompletions));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				getIndex(indexValues) {
+					/*this.$alert(JSON.stringify(indexValues.typeofdocument));
+					location.href = "../CWL/OffSiteRescueSheet.html";*/
+					sessionStorage.setItem("repairOrder", indexValues.repairorder);
+					sessionStorage.setItem("typeOfDocument",indexValues.typeofdocument);
+					sessionStorage.setItem("testOnCompletion",JSON.stringify(indexValues));
+					if(indexValues.typeofdocument == "救援" && indexValues.thedocumentsstate !="完工") {
+						index.addTab(index.editableTabsValue, '站外救援单', 'o001');
+					} else if(indexValues.typeofdocument == "维修" && indexValues.thedocumentsstate !="完工") {
+						index.addTab(index.editableTabsValue, '维修单', 'r001');
+					}
+				},
+				add(){
+					this.isShow = true;
+					//解决预加载问题
+					this.$nextTick(() => {
+						$("#show").load('../CWL/addTestOnCompletion.html');
+					})
+				}
+			},
+			mounted() {
+				this.getTestOnCompletionInfos();
+			}
+		});
+	</script>
+
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>接车登记</title>
+		<!--<link rel="stylesheet" type="text/css" href="../css/element.css" />-->
+		<style type="text/css">
+			.el-input {
+				width: 200px;
+			}
+			
+			#pickUpCarRegistration {
+				zoom: 0.8;
+			}
+			
+			.el-tabs {
+				width: 100%;
+			}
+			
+			.hiddenContent {
+				opacity: 0;
+			}
+			
+			#infos {
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="pickUpCarRegistration" align="center">
+
+			<div id="infos">
+				<el-row>
+					<el-col :span="0">
+						<div class="hiddenContent">hiddenContent</div>
+					</el-col>
+					<el-col :span="6">
+						<!--<div>
+							<span>公众号会员码</span>
+							<el-input placeholder="公众号会员码"></el-input>
+						</div>-->
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>车信息</span>
+							<el-button type="primary" @click="dialogVisible = true" plain>请选择</el-button>
+						</div>
+					</el-col>
+				</el-row>
+				<el-dialog title="提示" :visible.sync="dialogVisible" width="70%" :before-close="handleClose">
+					<el-table :data="Vehicles" highlight-current-row @current-change="addCars" :border="true" height="310px" style="width: 100%" max-height="310">
+						<el-table-column type="index" label="序号" width="150">
+						</el-table-column>
+						<el-table-column prop="vid" label="车编号" width="200">
+						</el-table-column>
+						<el-table-column prop="clientid" label="客户编号" width="200">
+						</el-table-column>
+						<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+						</el-table-column>
+						<el-table-column prop="license" label="车牌号" width="200">
+						</el-table-column>
+						<el-table-column prop="model" label="车辆型号" width="200">
+						</el-table-column>
+						<el-table-column prop="driver" label="驾驶员" width="200">
+						</el-table-column>
+						<el-table-column prop="driverphone" label="驾驶员电话" width="200">
+						</el-table-column>
+						<el-table-column prop="vehicleownership" label="车辆归属" width="200">
+						</el-table-column>
+						<el-table-column prop="vin" label="车架号" width="200">
+						</el-table-column>
+						<el-table-column prop="enginebrand" label="发动机品牌" width="200">
+						</el-table-column>
+						<el-table-column prop="vehiclemodel" label="车辆年款" width="200">
+						</el-table-column>
+						<el-table-column prop="mileage" label="里程" width="200">
+						</el-table-column>
+						<el-table-column prop="load" label="载重" width="200">
+						</el-table-column>
+						<el-table-column prop="carseries" label="车系" width="200">
+						</el-table-column>
+						<el-table-column prop="buydate" label="购买日期" width="200">
+						</el-table-column>
+						<el-table-column prop="registereddate" label="上牌日期" width="200">
+						</el-table-column>
+						<el-table-column prop="citydue" label="车检到期" width="200">
+						</el-table-column>
+						<el-table-column prop="fueltype" label="燃油类型" width="200">
+						</el-table-column>
+						<el-table-column prop="member" label="会员码" width="200">
+						</el-table-column>
+						<el-table-column prop="zip" label="邮编" width="200">
+						</el-table-column>
+					</el-table>
+					<span slot="footer" class="dialog-footer">
+					    <el-button @click="dialogVisible = false">取 消</el-button>
+				  	</span>
+				</el-dialog>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>车主信息:</span>
+							<!--<span>{{Vehicle.client[0].cname}}</span>-->
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>车牌号:</span>
+							<span>{{Vehicle.license}}</span>
+						</div>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>驾驶员:</span>
+							<span>{{Vehicle.driver}}</span>
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>品牌:</span>
+							<span>{{Vehicle.enginebrand}}</span>
+						</div>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>驾驶员电话:</span>
+							<span>{{Vehicle.driverphone}}</span>
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>发动机:</span>
+							<span>{{Vehicle.engine}}</span>
+						</div>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>发动机品牌:</span>
+							<span>{{Vehicle.enginebrand}}</span>
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>车辆年款:</span>
+							<span>{{Vehicle.vehiclemodel}}</span>
+						</div>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>上牌日期:</span>
+							<span>{{Vehicle.registereddate}}</span>
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>车系:</span>
+							<span>{{Vehicle.carseries}}</span>
+						</div>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="6">
+						<div>
+							<span>上牌日期:</span>
+							<span>{{Vehicle.registereddate}}</span>
+						</div>
+					</el-col>
+					<el-col :span="6">
+						<div>
+							<span>燃油类型:</span>
+							<span>{{Vehicle.fueltype}}</span>
+						</div>
+					</el-col>
+				</el-row>
+			</div>
+			<el-row>
+				<el-col :span="24">
+					<el-tabs v-model="activeName">
+						<el-tab-pane label="作业中的车辆" name="first">
+							<el-table ref="multipleTable" :data="this.testOnCompletions" @row-click="getIndex" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="repairorder" label="维修单号">
+								</el-table-column>
+								<el-table-column prop="typeofdocument" label="单据类型" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="businesstype" label="业务类型" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="constructiondivisions" label="施工班次" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="ownername" label="车主姓名" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="licenseplatenumber" label="车牌号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="cartype" label="车型" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="vin" label="车架号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="pickupcartime" label="接车时间" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="expectedcompletion" label="预计完工" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="timeofcompletion" label="完工时间" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="delaysreason" label="误工原因" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="numberofrework" label="返工数" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="penaltyamount" label="处罚金额" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="reworkreason" label="返工原因" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</el-tab-pane>
+						<el-tab-pane label="维修项目" name="third">
+							<el-table ref="multipleTable" :data="MaintenanceItems" tooltip-effect="dark" style="width: 100%">
+								<el-table-column prop="oid" label="项目编号">
+								</el-table-column>
+								<el-table-column prop="oname" label="项目名称" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="number" label="数量" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="priceclass" label="价类" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="unitprice" label="单价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="money" label="金额" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="settlementprice" label="技师结算价" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="errordesc" label="故障描述" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="errorcause" label="故障原因" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="themaintenancecrew" label="维修班组" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="busyworkgroup" label="作业人员" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="server" label="服务顾问" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="workordernumber" label="工单号" show-overflow-tooltip>
+								</el-table-column>
+								<el-table-column prop="freeofchargefor" label="免单原因" show-overflow-tooltip>
+								</el-table-column>
+							</el-table>
+						</el-tab-pane>
+					</el-tabs>
+				</el-col>
+			</el-row>
+		</div>
+	</body>
+	<!--<script src="../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/element.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios_cfg.js" type="text/javascript" charset="utf-8"></script>-->
+	<script type="text/javascript">
+		var pickUpCarRegistration = new Vue({
+			el: "#pickUpCarRegistration",
+			data: {
+				carNumber: "",
+				carNumbers: [{
+					values: "",
+					name: ""
+				}],
+				dialogVisible: false,
+				infos: "default",
+				activeName: 'first',
+				MaintenanceItems: [],
+				testOnCompletions: [],
+				Vehicles: [],
+				Vehicle: {}
+				//						vId:"",
+				//						clientId:"",
+				//						vehicleBrand:"",
+				//						model:"",
+				//						driver:"",
+				//						driverPhone:"",
+				//						vehicleOwnership:"",
+				//						VIN:"",
+				//						engine:"",
+				//						engineBrand:"",
+				//						vehicleModel:"",
+				//						mileage:"",
+				//						load:"",
+				//						carSeries:"",
+				//						buyDate:"",
+				//						registeredDate:"",
+				//						cityDue:"",
+				//						fuelType::"",
+				//						member:"",
+				//						license:""
+			},
+			methods: {
+				getTestOnCompletionInfos() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/testOnCompletion/queryByCondition/%E8%AF%B7%E9%80%89%E6%8B%A9/%E8%AF%B7%E9%80%89%E6%8B%A9/%E8%AF%B7%E8%BE%93%E5%85%A5/%E8%AF%B7%E9%80%89%E6%8B%A9/%E8%AF%B7%E8%BE%93%E5%85%A5/%E8%AF%B7%E8%BE%93%E5%85%A5`).then(function(success) {
+						_This.testOnCompletions = success.data;
+						console.log(JSON.stringify(_This.testOnCompletions));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				handleClose(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				addCars(row) {
+					this.Vehicle = row;
+					console.log(row);
+					this.getmaintenanceItemInfosByCarNum();
+				},
+				getIndex(indexValues) {
+					/*this.$alert(JSON.stringify(indexValues.typeofdocument));
+					location.href = "../CWL/OffSiteRescueSheet.html";*/
+					sessionStorage.setItem("repairOrder", indexValues.repairorder);
+					sessionStorage.setItem("typeOfDocument", indexValues.typeofdocument);
+					sessionStorage.setItem("testOnCompletion", JSON.stringify(indexValues));
+					if(indexValues.typeofdocument == "救援") {
+						index.addTab(index.editableTabsValue, '站外救援单', 'o001');
+					} else if(indexValues.typeofdocument == "维修") {
+						index.addTab(index.editableTabsValue, '维修单', 'r001');
+					}
+				},
+				getVehicleInfos() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicle/queryAll`).then(function(success) {
+						_This.Vehicles = success.data;
+						console.log(_This.Vehicles);
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				getmaintenanceItemInfosByCarNum() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/carNum/${this.Vehicle.license}`).then(function(success) {
+						_This.MaintenanceItems = success.data;					
+						console.log(JSON.stringify(_This.MaintenanceItems));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				}
+
+			},
+			mounted() {
+				this.getTestOnCompletionInfos();
+				this.getVehicleInfos();
+				//this.getmaintenanceItemInfosByCarNum();
+			}
+		});
+	</script>
+
+</html>

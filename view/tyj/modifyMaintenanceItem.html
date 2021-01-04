@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>修改维修项目</title>
+	</head>
+	<!--<link rel="stylesheet" type="text/css" href="../css/element.css" />-->
+	<body>
+		<div id="addMaintenanceItem">
+			<el-form :inline="true" :model="maintenanceItem" class="demo-form-inline">
+				<el-form-item label="项目名称">
+					<!--<el-input v-model="RepairBill.engineBrand" placeholder="发动机品牌"></el-input>-->
+					<template>
+						<el-select :disabled="true" :popper-append-to-body="false" v-model="maintenanceItem.oname" placeholder="请选择">
+							<el-option v-for="item in oNameList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="项目编号">
+					<el-input :disabled="true" v-model="maintenanceItem.oid" placeholder="项目编号"></el-input>
+				</el-form-item>
+				<el-form-item label="数量">
+					<el-input v-model="maintenanceItem.number" placeholder="数量"></el-input>
+				</el-form-item>
+				<el-form-item label="单价">
+					<el-input v-model="maintenanceItem.unitprice" placeholder="单价"></el-input>
+				</el-form-item>
+				<el-form-item label="价类">
+					<template>
+						<el-select v-model="maintenanceItem.priceclass" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in priceClassList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="技师结算标价">
+					<el-input v-model="maintenanceItem.settlementprice" placeholder="技师结算标价"></el-input>
+				</el-form-item>
+				<el-form-item label="金额">
+					<el-input :disabled="true" v-model="maintenanceItem.money" placeholder="金额"></el-input>
+				</el-form-item>
+				<el-form-item label="维修班组">
+					<template>
+						<el-select v-model="maintenanceItem.themaintenancecrew" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in theMaintenanceCrewList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="作业人员">
+					<el-input v-model="maintenanceItem.busyworkgroup" placeholder="作业人员"></el-input>
+				</el-form-item>
+				<el-form-item label="免单原因">
+					<template>
+						<el-select v-model="maintenanceItem.freeofchargefor" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in freeOfChargeForList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="服务顾问">
+					<el-select v-model="maintenanceItem.server" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in serverList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+				</el-form-item>
+				<el-form-item label="单号">
+					<el-input :disabled="true" v-model="maintenanceItem.workordernumber" placeholder="单号"></el-input>				
+				</el-form-item>
+					<template v-if="maintenanceItem==null">
+						<el-button type="success" icon="el-icon-check" @click="addMaintenanceItem()" circle></el-button>
+					</template>
+					<template v-else>
+						<el-button type="success" icon="el-icon-check" @click="modifyMaintenanceItem()" circle></el-button>
+					</template>
+				<br />
+				<el-form-item label="故障描述">
+					<el-input v-model="maintenanceItem.errordesc" placeholder="故障描述" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+				<br />
+				<el-form-item label="故障原因">
+					<el-input v-model="maintenanceItem.errorcause" placeholder="故障原因" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+				<br />
+				
+			</el-form>
+		</div>				
+	</body>
+	<!--<script src="../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/element.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/axios_cfg.js" type="text/javascript" charset="utf-8"></script>-->
+	<script type="text/javascript">
+		addMaintenanceItem = new Vue({
+			el:"#addMaintenanceItem",
+			data(){
+				return{
+					maintenanceItem:{
+						oid:"",
+						oname:"",
+						number:"",
+						priceclass:"",
+						unitprice:"",
+						money:"",
+						settlementprice:"",
+						errordesc:"",
+						errorcause:"",
+						themaintenancecrew:"",
+						busyworkgroup:"",
+						server:"",
+						workordernumber:"",
+						freeofchargefor:""
+					},
+					oNameList:[{
+						values: "business01",
+						name: "维修一"
+					},{
+						values: "business02",
+						name: "维修二"
+					},{
+						values: "business03",
+						name: "维修三"
+					}],
+					priceClassList:[{
+						values: "priceclass01",
+						name: "价类一"
+					},{
+						values: "priceclass02",
+						name: "价类二"
+					},{
+						values: "priceclass03",
+						name: "价类三"
+					}],
+					freeOfChargeForList:[{
+						values: "free01",
+						name: "原因一"
+					},{
+						values: "free02",
+						name: "原因二"
+					},{
+						values: "free03",
+						name: "原因三"
+					}],
+					theMaintenanceCrewList:[{
+						values: "crew01",
+						name: "班组一"
+					},{
+						values: "crew02",
+						name: "班组二"
+					},{
+						values: "crew03",
+						name: "班组三"
+					}],
+					serverList:[{
+						values: "server01",
+						name: "大大熊"
+					},{
+						values: "server02",
+						name: "大大喵"
+					},{
+						values: "server03",
+						name: "小小喵"
+					}]
+				}
+			},methods:{
+				modifyMaintenanceItem(){
+					/*this.$alert("修改");
+					return false;*/
+					this.maintenanceItem.money =  Number(this.maintenanceItem.unitprice * parseInt(this.maintenanceItem.number) * this.maintenanceItem.settlementprice);
+					/*this.$alert(this.maintenanceItem.money);
+					this.$alert(JSON.stringify(this.maintenanceItem));*/
+					console.log(JSON.stringify(this.maintenanceItem));
+					let _This = this;
+					axios.put(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/modify`, this.maintenanceItem).then(function(success) {
+						if(success.data == 1) {
+							_This.$alert("success");
+							if(sessionStorage.getItem("typeOfDocument")=="救援"){
+								offSiteRescueSheet.getmaintenanceItemInfosByWorkOrderNum();
+								offSiteRescueSheet.isShow = false;
+							}else if(sessionStorage.getItem("typeOfDocument")=="维修"){
+								repairBill.getmaintenanceItemInfosByWorkOrderNum();
+								repairBill.isShow = false;
+							}				
+						} else {
+							_This.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				}
+			},mounted(){
+				//this.maintenanceItem.workordernumber = sessionStorage.getItem("repairOrder");
+				this.maintenanceItem = JSON.parse(sessionStorage.getItem("indexObject"));
+				//this.$alert(this.maintenanceItem.oid);
+				//this.maintenanceItem.workordernumber = sessionStorage.getItem("indexObject").workordernumber;
+				//this.$alert(sessionStorage.getItem("indexObject").workordernumber);
+			}
+		});
+	</script>
+</html>

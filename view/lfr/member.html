@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>结算中心</title>
+		<style>
+			.clientCente {
+				background-color: #fafafa;
+			}
+			
+			h1 {
+				font-size: 25px;
+			}
+			
+			.sum_danhao {
+				width: 300px;
+			}
+			
+			#memberApp {
+				zoom: 0.8;
+			}
+		</style>
+		<!--<link rel="stylesheet" href="../../css/element.css">-->
+	</head>
+
+	<body>
+		<div id="memberApp">
+			<h1>结算中心</h1>
+			<el-row>
+				<el-col :span="5">
+					&nbsp;
+				</el-col>
+				<el-col :span="2">
+					<span style="line-height: 40px;">
+							会员卡号：
+						</span>
+				</el-col>
+				<el-col :span="6">
+					<el-input v-model="ClientVo.bianhao" class="input-with-select">
+					</el-input>
+				</el-col>
+				<el-col :span="1">
+					&nbsp;
+				</el-col>
+				<el-col :span="5">
+					&nbsp;&nbsp;
+					<el-button @click="showMember('会员')" type="primary" icon="el-icon-search">查询</el-button>
+					&nbsp;
+					<el-button @click="addMemberYm" type="success">新增</el-button>
+				</el-col>
+				<el-col :span="5">
+					&nbsp;
+				</el-col>
+			</el-row>
+			<el-dialog title="添加会员" :visible.sync="dialogVisible" width="40%" :before-close="handleCloses1">
+				<el-row>
+					<el-col :span="3">&nbsp;</el-col>
+					<el-col :span="21">
+						<el-form :model="memberAdd" :rules="rules" ref="memberAdd" label-width="100px" class="demo-ruleForm">
+							<div style="width: 75%;">
+								<el-form-item label="用户名称" prop="cname">
+									<el-autocomplete v-model="memberAdd.cname" :popper-append-to-body="false" style="width: 100%;" class="inline-input" :fetch-suggestions="querySearch" placeholder="请输入要绑定的用户名称" @select="handleSelect"></el-autocomplete>
+								</el-form-item>
+							</div>
+							<div style="width: 75%;">
+								<el-form-item label="会员卡号" prop="cardno">
+									<el-input v-model="memberAdd.cardno"></el-input>
+								</el-form-item>
+							</div>
+							<div style="width: 75%;">
+								<el-form-item label="账户金额" prop="earnest">
+									<el-input v-model.number="memberAdd.earnest"></el-input>
+								</el-form-item>
+							</div>
+							<el-form-item>
+								<el-button type="primary" @click="addFormMember('memberAdd')">立即添加</el-button>
+								<el-button @click="dialogVisible=false">关闭</el-button>
+							</el-form-item>
+						</el-form>
+
+					</el-col>
+				</el-row>
+			</el-dialog>
+			<el-dialog title="会员充值" :visible.sync="dialogVisibleMember" width="40%" :before-close="handleCloses1">
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+						<span style="line-height: 40px;">
+							账户金额：
+						</span>
+					</el-col>
+					<el-col :span="10">
+						<el-input v-model.number="memberMoney"></el-input>
+					</el-col>
+					<el-col :span="6">
+						&nbsp;
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+						<span style="line-height: 40px;">
+							充值方式：
+						</span>
+					</el-col>
+					<el-col :span="10">
+						<el-radio v-model="radios" label="1" size="medium" border>支付宝支付</el-radio>
+						<el-radio v-model="radios" label="2" size="medium" border>现金支付</el-radio>
+					</el-col>
+					<el-col :span="6">
+						&nbsp;
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">&nbsp;</el-col>
+					<el-col :span="16">
+						<el-button type="primary" @click="rechargeAdd">立即充值</el-button>
+						<el-button @click="dialogVisibleMember=false">关闭</el-button>
+					</el-col>
+				</el-row>
+			</el-dialog>
+			<br />
+			<el-row>
+				<el-col :span="20" :offset="5">
+					<el-table :border="true" :data="member" max-height="600" style="width: 801px">
+						<el-table-column type="index" label="序号" width="100">
+						</el-table-column>
+						<el-table-column property="cardno" label="会员卡号" width="171">
+						</el-table-column>
+						<el-table-column property="admissiondate" label="入会日期" width="178">
+						</el-table-column>
+						<el-table-column property="earnest" label="账户余额" width="171">
+						</el-table-column>
+						<el-table-column label="操作" width="180">
+							<template slot-scope="scope">
+								<el-button type="primary" @click="recharge(scope.row)" size="mini">充值</el-button>
+								<el-button type="danger" @click="removeMember(scope.row)" size="mini">删除</el-button>
+							</template>
+						</el-table-column>
+					</el-table>
+					</el-table>
+				</el-col>
+			</el-row>
+		</div>
+	</body>
+	<!--<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/left.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/echarts.min.js"></script>-->
+	<script>
+		const summaryApp = new Vue({
+			el: '#memberApp',
+			data: {
+				radios: '1',
+				ClientVo: {
+					bianhao: '',
+					userType: ''
+				},
+				ClientVo2: {
+					bianhao: '',
+					userType: ''
+				},
+				state1: '',
+				restaurants: [],
+				dialogVisibleMember: false,
+				dialogVisible:false,
+				memberAdd: {
+					cid: '',
+					cname: '',
+					usertype: '会员',
+					cardno: '',
+					integral: '',
+					earnest: '',
+					admissiondate: '11'
+				},
+				memberMoney: '',
+				memberRecharge: {},
+				rules: {
+					cname: [{
+						required: true,
+						message: '用户名称不能为空！',
+						trigger: 'blur'
+					}],
+					cardno: [{
+						required: true,
+						message: '请输入会员编号',
+						trigger: 'blur'
+					}],
+					earnest: [{
+							required: true,
+							message: '请输入金额',
+							trigger: 'blur'
+						},
+						{
+							type: 'number',
+							message: '金额必须为数值'
+						}
+					]
+				},
+				dialogVisible: false,
+				member: [],
+				consumer: []
+			},
+			methods: {
+				showMember(userType) {
+					let _this = this
+					this.ClientVo.userType = userType
+					axios.post("http://localhost:8080/dzw_sys/api/client/selectMember", _this.ClientVo).then(function(resp) {
+						_this.member = resp.data
+					})
+				},
+				handleCloses1(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				rechargeAdd() {
+					let _this = this
+					if(this.memberMoney != '' && this.memberMoney > 999) {
+						this.memberRecharge.earnest += this.memberMoney
+					} else {
+						_this.$message({
+							message: '每次充值不能少于1000！',
+						});
+						return false;
+					}
+					if(this.radios == '2') {
+						axios.put("http://localhost:8080/dzw_sys/api/client/updateClient2", this.memberRecharge).then(function(resp) {
+							if(resp.data) {
+								_this.showMember("会员");
+								_this.dialogVisibleMember = false;
+								_this.$message({
+									message: '充值成功！',
+									type: 'success'
+								});
+							} else {
+								_this.$message({
+									message: '充值失败！',
+									type: 'error'
+								});
+							}
+						})
+					} else {
+						this.dialogVisibleMember = false;
+						window.sessionStorage.setItem("memberRecharge", JSON.stringify(this.memberRecharge))
+						window.sessionStorage.setItem("panduan", true)
+						window.open("http://localhost:8080/dzw_sys/api/pay/"+this.weiYiId()+"/"+this.memberMoney+"/be recharged successfully/huiyuanchongzhi","_blank");
+					}
+				},
+				weiYiId() {
+					var s = [];
+					var hexDigits = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM";
+					for(var i = 0; i < 10; i++) {
+						s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+					}
+					s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+					s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+					s[8] = s[13] = s[18] = s[23];
+					var uuid = s.join("");
+					return uuid;
+				},
+				removeMember(data) {
+					let memberRemove = {
+						cid: data.cid,
+						usertype: '普通用户',
+						cardno: '',
+						integral: '',
+						earnest: '',
+						admissiondate: ''
+					}
+					let _this = this
+					this.$confirm('是否删除?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						axios.put("http://localhost:8080/dzw_sys/api/client/updateMember", memberRemove).then(function(resp) {
+							if(resp.data) {
+								_this.showMember("会员");
+								_this.$message({
+									message: '删除成功！',
+									type: 'success'
+								});
+							} else {
+								_this.$message({
+									message: '删除失败！',
+									type: 'error'
+								});
+							}
+						})
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+
+				},
+				recharge(data) {
+					this.dialogVisibleMember = true;
+					this.memberRecharge = JSON.parse(JSON.stringify(data))
+				},
+				addMemberYm() {
+					let _this = this
+					axios.get("http://localhost:8080/dzw_sys/api/client/selectMemberVo").then(function(resp) {
+						if(JSON.stringify(resp.data) == "[]") {
+							_this.$message('请先添加一个用户！');
+							return false;
+						} else {
+							_this.consumer = resp.data
+							_this.dialogVisible = true
+						}
+					})
+
+				},
+				addFormMember(formName) {
+					let _this = this
+					this.$refs[formName].validate((valid) => {
+						if(this.memberAdd.earnest < 999) {
+							this.$message({
+								message: '每次充值不能少于1000！',
+							});
+							return false;
+						}
+						axios.put("http://localhost:8080/dzw_sys/api/client/updateClient2", _this.memberAdd).then(function(resp) {
+							if(resp.data) {
+								_this.showMember("会员");
+								_this.dialogVisible = false
+								_this.$message({
+									message: '添加成功！',
+									type: 'success'
+								});
+							} else {
+								_this.$message({
+									message: '添加失败！',
+									type: 'error'
+								});
+							}
+						})
+					})
+
+				},
+				querySearch(queryString, cb) {
+					var restaurants = this.consumer;
+					var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				},
+				createFilter(queryString) {
+					return(restaurant) => {
+						return(restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+					};
+				},
+				loadAll() {
+					return [{
+							"value": "三全鲜食（北新泾店）",
+							"address": "长宁区新渔路144号"
+						},
+						{
+							"value": "Hot honey 首尔炸鸡（仙霞路）",
+							"address": "上海市长宁区淞虹路661号"
+						},
+						{
+							"value": "新旺角茶餐厅",
+							"address": "上海市普陀区真北路988号创邑金沙谷6号楼113"
+						}
+					];
+				},
+				handleSelect(item) {
+					this.memberAdd.cid = item.cid
+					console.log(item);
+				}
+			},
+			mounted() {
+				this.restaurants = this.loadAll();
+				this.showMember("会员")
+			}
+		})
+	</script>
+
+</html>

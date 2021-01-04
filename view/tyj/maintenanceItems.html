@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+		<div id="supplier">
+			<el-container>
+				<el-main>
+					<el-row>
+						<el-col :span="24" style="background-color: #F5F7FA;margin-top: 0px;">
+							<el-container>
+								<el-header style="height: 55px;display: block;padding-bottom: 20px;">
+									<label style="font-size: 12px;">类别名称</label>
+									<el-input v-model="smallrepair.sname" style="width: 180px;" placeholder="类别名称" size="small"></el-input>
+									<el-button @click="addSmallRepair" type="primary" size="small">新增项目类别</el-button>
+									<el-button @click="handlByUpdateOpen" type="primary" icon="el-icon-edit" size="small" style="margin-left: 240px;">修改</el-button>
+									<el-button @click="delRepair" type="danger" icon="el-icon-delete" size="small">删除</el-button>
+									<el-button @click="handlByAddOpen" type="success" icon="el-icon-s-unfold" size="small">增加</el-button>
+									<el-button type="primary" icon="el-icon-upload" size="small">导出</el-button>
+								</el-header>
+								<el-container>
+									<el-aside width="22%" style="padding: 15px;">
+										<div style="">
+											<el-tree @node-click="getId" :data="cityAll" show-checkbox default-expand-all node-key="cityAll[0].goods.gid" ref="tree" highlight-current :props="defaultProps">
+											</el-tree>
+										</div>
+									</el-aside>
+									<el-main>
+										<template>
+											<el-table v-if="repair" :data="repair" @current-change="handleCurrentChange" highlight-current-row style="width: 100%;height:550px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 4px;">
+												<el-table-column align="center" v-if="repair" prop="rid" label="项目编码">
+												</el-table-column>
+												<el-table-column align="center" v-if="repair" prop="repairname" label="项目名称" width="180px">
+												</el-table-column>
+												<el-table-column align="center" v-if="repair" prop="rjbmoney" label="标准价">
+												</el-table-column>
+												<el-table-column align="center" v-if="repair" prop="rhymoney" label="会员价">
+												</el-table-column>
+												<el-table-column align="center" v-if="repair" prop="rvipmoney" label="VIP价">
+												</el-table-column>
+												<el-table-column align="center" v-if="repair" prop="repxyperice" label="协议价">
+												</el-table-column>
+											</el-table>
+										</template>
+									</el-main>
+								</el-container>
+							</el-container>
+						</el-col>
+					</el-row>
+				</el-main>
+			</el-container>
+
+			<!-- 维修项目修改模态框 -->
+			<el-dialog :destroy-on-close="true" v-if="updateRepair" @opened="handlByUpdateOpen" :before-close="repairClose" title="维修项目详情" :visible.sync="isSupplier" center>
+				<el-form label-width="100px" v-if="updateRepair" :model="updateRepair">
+					<el-form-item label="项目名称：">
+						<el-input v-model="updateRepair.repairname" style="width: 500px;" placeholder="请输入项目名称"></el-input>
+					</el-form-item>
+					<el-form-item label="标准价：">
+						<el-input v-model="updateRepair.rjbmoney" style="width: 500px;" placeholder="请输入标准价"></el-input>
+					</el-form-item>
+					<el-form-item label="会员价：">
+						<el-input v-model="updateRepair.rhymoney" style="width: 500px;" placeholder="请输入会员价"></el-input>
+					</el-form-item>
+					<el-form-item label="VIP价：">
+						<el-input v-model="updateRepair.rvipmoney" style="width: 500px;" placeholder="请输入VIP价"></el-input>
+					</el-form-item>
+					<el-form-item label="协议价：">
+						<el-input v-model="updateRepair.repxyperice" style="width: 500px;" placeholder="请输入协议价"></el-input>
+					</el-form-item>
+					<el-form-item label="项目备注：">
+						<el-input v-model="updateRepair.repevent" style="width: 500px;" placeholder="请输入项目备注"></el-input>
+					</el-form-item>
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="isSupplier = false">取 消</el-button>
+					<el-button @click="updateByRepair" type="primary">确 定</el-button>
+				</div>
+			</el-dialog>
+			<!-- 类别新增模态框 -->
+			<el-dialog :destroy-on-close="true" @opened="handlByAddOpen" :before-close="reseClose" title="新增维修项目" :visible.sync="isCity" center>
+				<el-form label-width="100px" :model="addRepair">
+					<el-form-item label="项目名称：">
+						<el-input v-model="addRepair.repairname" style="width: 500px;" placeholder="请输入项目名称"></el-input>
+					</el-form-item>
+					<el-form-item label="标准价：">
+						<el-input v-model="addRepair.rjbmoney" style="width: 500px;" placeholder="请输入标准价"></el-input>
+					</el-form-item>
+					<el-form-item label="会员价：">
+						<el-input v-model="addRepair.rhymoney" style="width: 500px;" placeholder="请输入会员价"></el-input>
+					</el-form-item>
+					<el-form-item label="VIP价：">
+						<el-input v-model="addRepair.rvipmoney" style="width: 500px;" placeholder="请输入VIP价"></el-input>
+					</el-form-item>
+					<el-form-item label="协议价：">
+						<el-input v-model="addRepair.repxyperice" style="width: 500px;" placeholder="请输入协议价"></el-input>
+					</el-form-item>
+					<el-form-item label="项目备注：">
+						<el-input v-model="addRepair.repevent" style="width: 500px;" placeholder="请输入项目备注"></el-input>
+					</el-form-item>
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="isCity = false">取 消</el-button>
+					<el-button @click="addByRepair" type="primary">确 定</el-button>
+				</div>
+			</el-dialog>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var supplier = new Vue({
+			el: "#supplier",
+			data() {
+				return {
+					smallrepair: {
+						sname: '',
+						gid: ''
+					},
+					selectColumn: '', //选中列
+					isCity: false, //类型模态框打开
+					supplierTitle: '',
+					isSupplier: false,
+					//添加删除 类别 对象
+					cityAll: [{
+						gid: 0,
+						sname: '维修项目类别',
+						goods: []
+
+					}],
+					//查询维修项目 对象
+					repair: [{
+						repairname: '',
+						repxyperice: '',
+						rhymoney: '',
+						rjbmoney: '',
+						rvipmoney: '',
+						repevent: '',
+						xtype: ''
+					}],
+					defaultProps: {
+						children: 'goods',
+						label: 'sname'
+					},
+					//添加维修项目 对象
+					addRepair: {
+						repairname: '',
+						repxyperice: '',
+						rhymoney: '',
+						rjbmoney: '',
+						rvipmoney: '',
+						repevent: '',
+						xtype: ''
+					},
+					//修改维修项目 对象
+					updateRepair: {
+						repairname: '',
+						repxyperice: '',
+						rhymoney: '',
+						rjbmoney: '',
+						rvipmoney: '',
+						repevent: '',
+						xtype: ''
+					}
+				}
+			},
+			mounted() {
+				this.queryCityAll();
+				this.queryRepairAll();
+			},
+			methods: {
+				handlByAddOpen() {
+					_this = this;
+					_this.addRepair.repairname="";
+					_this.addRepair.repxyperice="";
+					_this.addRepair.rhymoney="";
+					_this.addRepair.rjbmoney="";
+					_this.addRepair.rvipmoney="";
+					_this.addRepair.repevent="";
+					if(_this.addRepair.xtype != "") {
+						_this.isCity = true;
+						_this.isSupplier = false;
+					} else {
+						_this.$message.error('请选择类别！');
+					}
+				},
+				updateByRepair() {
+					_this = this;
+					axios.put('http://localhost:8080/dzw_sys/api/repair/repair', _this.updateRepair).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message.success('更新成功');
+							_this.queryRepairByXtype(_this.addRepair.xtype);
+							_this.repairClose();
+						}
+					}).catch(function(e) {
+						console.log(e);
+					});
+				},
+				delRepair() {
+					_this = this;
+					if(_this.selectColumn != "") {
+						_this.$confirm('此操作将删除发动机品牌, 是否继续?', '温馨提示', {
+							confirmButtonText: '确定',
+							cancelButtonText: '取消',
+							type: 'warning'
+						}).then(() => {
+							axios.delete(`http://127.0.0.1:8080/dzw_sys/api/repair/del/${_this.updateRepair.rid}`).then(function(resp) {
+								if(resp.data.code == "200") {
+									_this.$message({
+										message: '移除成功!',
+										type: 'success'
+									});
+									_this.queryRepairByXtype(_this.addRepair.xtype);
+								} else {
+									_this.$message({
+										message: '移除失败!',
+										type: 'error'
+									});
+								}
+							}).catch(function(e) {
+								console.info(e);
+							})
+						}).catch(() => {
+							_this.$message({
+								type: 'info',
+								message: '已取消删除'
+							});
+						});
+					} else {
+						_this.$message({
+							type: 'info',
+							message: '请选择你要删除的列！'
+						});
+					}
+				},
+				addByRepair() {
+					_this = this;
+					axios.post("http://127.0.0.1:8080/dzw_sys/api/repair/add", _this.addRepair).then(function(resp) {
+						console.log(resp.data);
+						if(resp.data.code == "200") {
+							_this.$message.success('新增成功');
+							_this.queryRepairByXtype(_this.addRepair.xtype);
+							_this.reseClose();
+						} else {
+							_this.$message.error('新增失败！');
+						}
+					}).catch(function(e) {
+						console.info(e);
+					})
+
+				},
+				handlByUpdateOpen() {
+					_this = this;
+					if(_this.selectColumn != "") {
+						_this.isSupplier = true;
+						_this.isCity = false;
+					} else {
+						_this.$message.error('请选择维修项目！');
+					}
+				},
+				queryRepairByXtype(xtype) {
+					let _this = this;
+					console.log(xtype);
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/repair/xtype/${xtype}`).then(function(resp) {
+						//alert(JSON.stringify(resp.data));
+						console.log(resp.data);
+						_this.repair = resp.data;
+					}).catch(function(e) {
+						console.log(e)
+					})
+				},
+				queryRepairAll() {
+					let _this = this;
+
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/repair`).then(function(resp) {
+						console.log(resp.data);
+						_this.repair = resp.data;
+					}).catch(function(e) {
+						console.log(e)
+					})
+				},
+				addSmallRepair() {
+					_this = this;
+					if(_this.smallrepair.sname != "") {
+						if(_this.smallrepair.gid != "") {
+							axios.post("http://127.0.0.1:8080/dzw_sys/api/smallrepair/add", _this.smallrepair).then(function(resp) {
+								console.log(resp.data);
+								if(resp.data.code == "200") {
+									_this.$message.success('新增成功');
+									_this.queryCityAll();
+								} else {
+									_this.$message.error('新增失败！');
+								}
+							}).catch(function(e) {
+								console.info(e);
+							})
+						} else {
+							_this.$message.success('请选择你要新增的类别！');
+						}
+					} else {
+						_this.$message.success('请输入类别名称！');
+					}
+				},
+				getId(data) {
+
+					console.log(data);
+					_this = this;
+					//_this.$alert(data);
+					_this.smallrepair.gid = data.gid;
+					if(data.sid != null) {
+
+						_this.addRepair.xtype = data.sid;
+						_this.queryRepairByXtype(data.sid);
+					}
+				},
+				//查看全部类别
+				queryCityAll() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/goodstype`).then(function(resp) {
+						resp.data.forEach(function(e, i) {
+							e.sname = e.gname;
+						})
+						console.log(resp.data);
+						_this.cityAll[0].goods = resp.data;
+					}).catch(function(e) {
+						console.log(e)
+					})
+				},
+				//关闭模态框维修项目详情表单清空
+				reseClose() {
+					_this = this;
+					_this.isCity = false;
+				},
+				repairClose() {
+					_this = this;
+					_this.updateRepair = "";
+					_this.isSupplier = false;
+				},
+				//选中列
+				handleCurrentChange(val) {
+					console.log(val);
+					this.selectColumn = val;
+					this.updateRepair = val;
+				}
+			}
+		})
+	</script>
+
+</html>

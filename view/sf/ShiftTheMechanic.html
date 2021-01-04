@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>人事-组织机构</title>
+	</head>
+
+	<body>
+		<div class="pb" id="ShiftTheMechanic">
+			<el-container>
+				<el-container>
+					<el-aside style="width:230px; background: white;">
+						<template>
+							<el-button @click="addPerson()" type="primary" size="mini">新增</el-button>
+							<el-button @click="updatePerson" type="warning" size="mini">修改</el-button>
+							<el-button @click="deletecs(person.bid)" type="danger" size="mini">删除</el-button><br /><br />
+							<el-table  @current-change="fuzhi" :data="person1" ref="singleTable" highlight-current-row @current-change="handleCurrentChange">
+								<el-table-column>
+									<template slot-scope="temp" >
+										<span @click="add(temp.row.bid)">{{temp.row.bname}}</span>
+									</template>
+								</el-table-column>
+							</el-table>
+							
+						</template>
+					</el-aside>
+					<el-main style=" background: white;">
+							<el-row>
+								<el-col :span="20" align="right">
+									<el-button @click="isShow=true" type="primary" size="mini">新增技工</el-button>
+									<el-dialog :before-close="handlerClose" @opened="handlerOpen" :visible.sync="isShow" title="新增员工" center>
+										<div id="cnt" v-loading="loading">
+										</div>
+									</el-dialog>
+									<el-button @click="isShows=true" type="warning" size="mini">修改技工</el-button>
+									<el-dialog :before-close="handlerClose" @opened="handlerOpenn" :visible.sync="isShows" title="修改员工" center>
+										<div id="cntt" v-loading="loading">
+										</div>
+									</el-dialog>
+									<el-button @click="deleteyid(tableData.yid)" type="danger" size="mini">删除技工</el-button>
+								</el-col>
+							</el-row>
+							<el-table @row-click="xg" style="width:90%;" ref="singleTable" :data="tableData.list" highlight-current-row @current-change="handleCurrentChange">
+								<el-table-column label="编号" type="index">
+									<template slot-scope="temp">
+										{{temp.$index+1}}
+									</template>
+								</el-table-column>
+								<el-table-column property="yname" label="姓名">
+									<template slot-scope="temp">
+										{{temp.row.yname}}
+									</template>
+								</el-table-column>
+								<el-table-column property="ysex" label="性别">
+									<template slot-scope="temp">
+										<template v-if="temp.row.ysex=='0'">
+											男
+										</template>
+										<template v-if="temp.row.ysex=='1'">
+											女
+										</template>
+									</template>
+								</el-table-column>
+								<el-table-column property="yphone" label="手机号码">
+									<template slot-scope="temp">
+										{{temp.row.yphone}}
+									</template>
+								</el-table-column>
+								<el-table-column property="yaddress" label="地址">
+									<template slot-scope="temp">
+										{{temp.row.yaddress}}
+									</template>
+								</el-table-column>
+								<el-table-column property="bname" label="部门">
+									<template slot-scope="temp">
+										{{temp.row.bname}}
+									</template>
+								</el-table-column>
+								<el-table-column property="zname" label="职位">
+									<template slot-scope="temp">
+										{{temp.row.zname}}
+									</template>
+								</el-table-column>
+							</el-table>
+							<br />
+							<div class="block">
+								<el-pagination :current-page="tableData.pageNum" @current-change="handleCurrentChange" :page-size="3" layout="total, prev, pager, next" :total=tableData.total>
+								</el-pagination>
+							</div>
+					</el-main>
+				</el-container>
+			</el-container>
+		</div>
+	</body>
+	<script>
+		var ShiftTheMechanic = new Vue({
+			data() {
+				return {
+					loading: true,
+					isShow: false,
+					isShows: false,
+					person1: {
+
+					},
+					person: {
+						bid: '',
+						bname: ''
+					},
+					tableData: {
+						yname: '',
+						ysex: '',
+						yphone: '',
+						yaddress: '',
+						bname: '',
+						zname: ''
+					},
+					currentRow: null,
+					bid:0,
+					xg1:{}
+
+				}
+			},
+			methods: {
+				setCurrent(row) {
+					this.$refs.singleTable.setCurrentRow(row);
+				},
+				handleCurrentChange(val) {
+					this.goToPage(val, this.tableData.pageSize);
+				},
+				handlerClose(done) {
+					this.$confirm('是否关闭?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						done(); //关闭
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消关闭'
+						});
+					});
+				},
+				handlerOpen() {
+					$("#cnt").load("../TY/xzyg.html");
+				},
+				handlerOpenn() {
+					$("#cntt").load("../TY/xgyg.html");
+				},
+				addPerson() {
+					let _this = this;
+					axios.post("http://127.0.0.1:8080/dzw_sys/ty/api/ment/xz", this.person).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '新增成功',
+								type: 'success'
+							})
+							_this.toPerson();
+						}
+					}).catch(function(e) {});
+				},
+				fuzhi(currentRow, oldCurrenRow) {
+					sss.person.bid = currentRow.bid;
+					sss.person.bname = currentRow.bname;
+				},
+				deletecs(bid) {
+					let _this = this;
+					axios.delete(`http://127.0.0.1:8080/dzw_sys/ty/api/ment/hhh/${bid}`).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '移除成功',
+								type: 'success'
+							})
+							_this.toPerson();
+						}
+					}).catch(function(e) {});
+				},
+				updatePerson() {
+					let _this = this;
+					axios.put("http://127.0.0.1:8080/dzw_sys/ty/api/ment/dd/Postb", this.person).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '修改成功',
+								type: 'success'
+							})
+							_this.toPerson();
+						}
+					}).catch(function(e) {});
+				},
+				toPerson() {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/ment/b`).then(function(resp) {
+						_this.person1 = resp.data;
+					})
+				},
+				goToPage(p, s) {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/z/${this.bid}/${p}/${s}`).then(function(resp) {
+						_this.tableData = resp.data;
+					}).catch(function(e) {
+						console.info(e);
+					});
+				},
+				add(id){
+					this.bid = id;
+					this.goToPage(1,3)
+				},
+				deleteyid(yid) {
+					let _this = this;
+					var yid = sss.xg1["yid"];
+					axios.delete(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/hhh/${yid}`).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '移除成功',
+								type: 'success'
+							})
+							_this.goToPage(1,3);
+						}
+					}).catch(function(e) {});
+				},
+				xg(row){
+					//alert(row.yid)
+					this.xg1["yid"]=row.yid;
+					alert(this.xg1["yid"])
+				}
+			},
+			mounted() {
+				this.toPerson();
+				this.goToPage(1, 3);
+			}
+		}).$mount("#ShiftTheMechanic");
+	</script>
+
+</html>

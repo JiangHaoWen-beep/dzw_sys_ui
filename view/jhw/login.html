@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>登录页面</title>
+		<link rel="stylesheet" href="../../css/element.css" />
+		<style>
+			body {
+				background: #CCCCCC;
+			}
+			
+			#loginApp {
+				width: 400px;
+				background: white;
+				padding: 20px 50px 30px 0;
+				margin: 20vh auto 0;
+				border-radius: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="loginApp" align="center">
+			<h2>
+				<i class="el-icon-menu"></i>
+				汽修管理系统-登录
+			</h2>
+			<div>
+				<el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+					<el-form-item label="账号：" prop="username">
+						<el-input type="username" v-model="ruleForm.username" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="密码：" prop="pwd">
+						<el-input type="password" v-model="ruleForm.pwd" autocomplete="off"></el-input>
+					</el-form-item>
+
+					<el-form-item>
+						<el-button type="primary" @click="submitForm('ruleForm',ruleForm.username,ruleForm.pwd)">登录</el-button>
+						<el-button @click="resetForm('ruleForm')">清空</el-button>
+					</el-form-item>
+				</el-form>
+			</div>
+		</div>
+	</body>
+
+	<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script>
+		var validatePass = (rule, value, callback) => {
+			if(value === '') {
+				callback(new Error('请输入账号'));
+			} else {
+				callback();
+			}
+		};
+		var validatePass2 = (rule, value, callback) => {
+			if(value === '') {
+				callback(new Error('请输入密码'));
+			} else {
+				callback();
+			}
+		};
+		var loginApp = new Vue({
+			el: "#loginApp",
+			data: {
+				ruleForm: {
+					username: '',
+					pwd: ''
+				},
+				rules: {
+					username: [{
+						validator: validatePass,
+						trigger: 'blur'
+					}],
+					pwd: [{
+						validator: validatePass2,
+						trigger: 'blur'
+					}]
+				}
+			},
+			methods: {
+				submitForm(formName, username, pwd) {
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/login/${username}/${pwd}`).then(resp => {
+								if(resp.data.code == "200") {
+									this.$alert('登录成功', {
+										confirmButtonText: '确定',
+										callback: action => {
+											window.sessionStorage.setItem("EMPLOYEE", JSON.stringify(resp.data.employee))
+											location.href = "index.html";
+										}
+									});
+								} else {
+									this.$alert("用户名或密码错误！")
+								}
+							})
+						} else {
+							console.log('error submit!!');
+							return false;
+						}
+					});
+
+				},
+				resetForm(formName) {
+					this.$refs[formName].resetFields();
+				}
+			}
+
+		})
+	</script>
+
+</html>

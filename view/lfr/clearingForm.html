@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>收银</title>
+		<link rel="stylesheet" href="../../css/element.css">
+	</head>
+
+	<body>
+		<div id="clearingFormApp">
+			前台收银
+			<el-form :model="updateClientData" label-width="100px" class="demo-ruleForm" label-position="left">
+				<el-row>
+					<el-col :span="3">&nbsp;</el-col>
+					<el-col :span="21">
+						<h2>
+							<span style="color: red;">
+								应收金额：
+							</span>
+							<span style="text-decoration:underline;color: blue;">
+								{{clearingMoney}}
+							</span>
+						</h2>
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="3">&nbsp;</el-col>
+					<el-col :span="4">
+						<el-form-item label="客总费">
+							<el-input v-model="updateClientData.aa"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="1">&nbsp;</el-col>
+					<el-col :span="4">
+						<el-form-item label="税率(%)">
+							<el-input v-model="updateClientData.aa"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="1">&nbsp;</el-col>
+					<el-col :span="4">
+						<el-form-item label="加税金">
+							<el-input v-model="updateClientData.aa"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="1">&nbsp;</el-col>
+					<el-col :span="4">
+						<el-form-item label="积分抵扣">
+							<el-input v-model="updateClientData.aa"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :span="1">&nbsp;</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="3">&nbsp;</el-col>
+					<el-col :span="6">
+						<h2>
+							<el-form-item label="结算状态">
+								<el-select v-model="value" placeholder="请选择">
+									<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" :disabled="item.disabled">
+									</el-option>
+								</el-select>
+							</el-form-item>
+						</h2>
+					</el-col>
+					<el-col :span="13">
+					</el-col>
+					<el-col :span="2">&nbsp;</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="3">&nbsp;</el-col>
+					<el-col :span="2">
+						<h2>
+							<el-checkbox v-model="checked">现金结算</el-checkbox>
+						</h2>
+					</el-col>
+					<el-col :span="4">
+						<h2>
+							<el-input v-model="updateClientData.aa"></el-input>							
+						</h2>
+					</el-col>
+					<el-col :span="15">&nbsp;</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">&nbsp;</el-col>
+					<el-col :span="8">
+						<el-form-item>
+							<el-button type="primary" @click="updateSubmitForm('updateClientData')">立即更新</el-button>
+							<el-button @click="dialogVisible2 = false">关闭</el-button>
+						</el-form-item>
+					</el-col>
+					<el-col :span="8">&nbsp;</el-col>
+				</el-row>
+			</el-form>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script type="text/javascript">
+		new Vue({
+			el: '#clearingFormApp',
+			data: {
+				clearingMoney: 0,
+				updateClientData: {
+					aa: "",
+				},
+				options: [{
+					value: '正常结算',
+					label: '正常结算'
+				}, {
+					value: '选项2',
+					label: '双皮奶',
+					disabled: true
+				}, {
+					value: '选项3',
+					label: '蚵仔煎'
+				}, {
+					value: '选项4',
+					label: '龙须面'
+				}, {
+					value: '选项5',
+					label: '北京烤鸭'
+				}],
+				value: '正常结算'
+			},
+			methods: {
+
+			}
+		})
+	</script>
+
+</html>

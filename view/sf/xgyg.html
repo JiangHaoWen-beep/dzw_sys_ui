@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+		<div class="container" id="vmUpdate">
+			<div class="row">
+				<table>
+					<tr>
+						<td>*职工名称：<input v-model="person.yname" style="width: 300px;" type="text" class="form-control" id="inputEmail3"></td>
+					</tr>
+					<tr>
+						<td>*职工账号：<input v-model="person.yaccount" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*职工密码：<input v-model="person.ypwd" style="width: 300px;" type="password" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>
+							职工性别：<input v-model="person.ysex" value="0" name="ww" type="radio">男
+							<input v-model="person.ysex" value="1" name="ww" type="radio">女
+						</td>
+					</tr>
+					<tr>
+						<td>*出生日期：<input v-model="person.ybirth" style="width: 300px;" type="date" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*手机电话：<input v-model="person.yphone" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*联系电话：<input v-model="person.ytel" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*联系地址：<input v-model="person.yaddress" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*紧急人联系电话：<input v-model="person.yjphone" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*紧急人联系姓名：<input v-model="person.yjname" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*职工工资：<input v-model="person.ymoney" style="width: 300px;" type="text" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*入职时间：<input v-model="person.yrdate" style="width: 300px;" type="date" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*试用结束时间：<input v-model="person.yjsdate" style="width: 300px;" type="date" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*合同开始时间：<input v-model="person.yhdate" style="width: 300px;" type="date" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>*合同结束时间：<input v-model="person.yhjdate" style="width: 300px;" type="date" class="form-control" id="inputPassword3"></td>
+					</tr>
+					<tr>
+						<td>
+							*部门：
+							<!--<select v-model="value1">
+								<option v-for="(temp1,i) in a" :value="temp1.bid">{{temp1.bname}}</option>
+							</select>-->
+							<select v-model="person.ymentid">
+									<option :value="temp.bid" v-for="(temp,i) in a">{{temp.bname}}</option>
+								</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							*职务：
+							<!--<select v-model="value2">
+								<option v-for="temp in b" :value="temp.zid">{{temp.zname}}</option>
+							</select>-->
+							<select v-model="person.ypostid">
+									<option :value="`${temp.zid}`" v-for="(temp,i) in b">{{temp.zname}}</option>
+								</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input @click="updatePerson" type="button" class="btn btn-default" value="保存" />
+							<input type="button" class="btn btn-default" value="返回" />
+						</td>
+					</tr>
+				</table>
+
+			</div>
+
+		</div>
+	</body>
+	<script>
+		var vmUpdate = new Vue({
+			el:"#vmUpdate",
+			data: {
+				person: {},
+				a: [],
+				b: [],
+				value1: 1,
+				value2: 1
+			},
+			mounted() {
+				this.query();
+				this.queryAll();
+				this.queryAll1();
+			},
+			methods: {
+				query() {
+					let _this = this;
+					var yid = sss.xg1["yid"];
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/cc/${yid}`).then(function(resp) {
+						_this.person = resp.data;
+						
+					}).catch(function(e) {});
+				},
+				queryAll() {
+					let _this = this;
+					axios.get("http://127.0.0.1:8080/dzw_sys/ty/api/employee/ww").then(function(resp) {
+						_this.a = resp.data;
+					});
+				},
+				queryAll1() {
+					let _this = this;
+					axios.get("http://127.0.0.1:8080/dzw_sys/ty/api/employee/zw").then(function(resp) {
+						_this.b = resp.data;
+					});
+				},
+				updatePerson() {
+					let _this = this;
+					axios.put("http://127.0.0.1:8080/dzw_sys/ty/api/employee/xx/Employee", this.person).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '修改成功',
+								type: 'success'
+							})
+							sss.isShows = false;
+							sss.goToPage(1,3);
+						}
+					}).catch(function(e) {});
+				}
+			}
+		});
+	</script>
+
+</html>

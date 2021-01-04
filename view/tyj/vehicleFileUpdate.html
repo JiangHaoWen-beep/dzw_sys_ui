@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#updateVehicleFile {
+				text-align: center;
+			}
+			
+			.el-select {
+				width: 540px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="updateVehicleFile">
+			<el-form label-width="100px" :model="vehicleType">
+				<el-form-item label="车型编号">
+					<el-input v-model="vehicleType.vtypeno" placeholder="请输入车型编号"></el-input>
+				</el-form-item>
+				<el-form-item label="车型名称">
+					<el-input v-model="vehicleType.vtypename" placeholder="请输入车型名称"></el-input>
+				</el-form-item>
+				<el-form-item label="参考价格">
+					<el-input v-model="vehicleType.vprice" placeholder="请输入车型价格"></el-input>
+				</el-form-item>
+				<el-form-item label="车辆品牌">
+					<el-select v-model="aaa" placeholder="请选择车辆品牌" @change="getVehicleBrandId(aaa)">
+						<el-option v-for="options in vehicleBrand" :label="options.vbrandname" :value="options.vbrandid">
+						</el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="发动机品牌">
+					<el-select v-model="bbb" placeholder="请选择发动机品牌" @change="getEngineBrandId(bbb)">
+						<el-option v-for="option in engineBrand" :label="option.enginetypename" :value="option.enginetypeid">
+						</el-option>
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<el-button @click="updateVehicle" type="primary">保存提交</el-button>
+		</div>
+	</body>
+	<script>
+		function closeUpdateModalBox() {
+			vehicleFile.vehicleUpdateShow = false;
+		}
+
+		function refresh() {
+			vehicleFile.queryVehicleTypeAll();
+		}
+
+		var updateVehicleFile = new Vue({
+			el: "#updateVehicleFile",
+			data() {
+				return {
+					aaa: '',
+					bbb: '',
+					engineBrand: [],
+					vehicleBrand: [],
+					vehicleType: {
+						vtypeno: '',
+						vtypename: '',
+						vprice: '',
+						carbrand: '',
+						enginetypeid: ''
+					}
+				}
+			},
+			methods: {
+				getEngineBrandId(id) {
+					_this = this;
+					console.log(id);
+					_this.vehicleType.enginetypeid = id;
+				},
+				getVehicleBrandId(id) {
+					_this = this;
+					console.log(id);
+					_this.vehicleType.carbrand = id;
+				},
+				selVehicleBrand() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehiclebrand`).then(function(resp) {
+						_this.vehicleBrand = resp.data;
+						console.log(_this.vehicleBrand);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				selEngineType() {
+					_this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/enginetype`).then(function(resp) {
+						_this.engineBrand = resp.data;
+						console.log(_this.engineBrand);
+					}).catch(function(e) {
+						console.info(e);
+					})
+				},
+				updateVehicle() {
+					let _this = this;
+					if(_this.vehicleType.vtypeno != "" && _this.vehicleType.vtypename != "" && _this.vehicleType.vprice != "" && _this.vehicleType.vbrandid != "" && _this.vehicleType.enginetypeid != "") {
+						axios.put('http://localhost:8080/dzw_sys/api/vehicletype/vehicletype', _this.vehicleType).then(function(resp) {
+							if(resp.data.code == "200") {
+								_this.$message.success('更新成功');
+								closeUpdateModalBox();
+								refresh();
+							}
+						}).catch(function(e) {
+							console.log(e);
+						});
+					} else {
+						_this.$alert('内容均不能为空！', '提示', {
+							confirmButtonText: '确定',
+							/*callback: action => {
+								this.$message({
+									type: 'info',
+									message: `action: ${ action }`
+								});
+							}*/
+						});
+					}
+				}
+			},
+			mounted() {
+				let a = sessionStorage.getItem("vehicletype");
+				let JSONa = JSON.parse(a);
+				this.vehicleType = JSONa;
+				console.log(this.vehicleType);
+
+				this.selVehicleBrand();
+				this.selEngineType();
+
+				this.aaa = this.vehicleType.carbrand;
+				this.bbb = this.vehicleType.enginetypeid;
+			}
+		});
+	</script>
+
+</html>

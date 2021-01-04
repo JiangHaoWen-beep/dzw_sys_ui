@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>车资料</title>
+		<style>
+			#carInfosApp {
+				zoom: 0.8;
+			}
+			
+			.clientCente {
+				background-color: #fafafa;
+			}
+		</style>
+		<!--<link rel="stylesheet" href="../../css/element.css">-->
+	</head>
+
+	<body>
+		<div id="carInfosApp">
+			<div>
+				<el-row>
+					<br>
+					<el-col :span="4">
+						<div class="grid-content bg-purple-dark">
+							<span style="font-size: 25px;">车资料</span>
+						</div>
+					</el-col>
+					<el-col :span="5">
+						<div class="grid-content bg-purple-dark">
+							&nbsp;
+						</div>
+					</el-col>
+					<el-col :span="9">
+						<div class="grid-content bg-purple-dark">
+							<el-input placeholder="匹配名称/名称简码/手机/会员卡号/车牌号" v-model="input3" class="input-with-select">
+							</el-input>
+						</div>
+					</el-col>
+					<el-col :span="1">
+						<div class="grid-content bg-purple-dark">
+							&nbsp;
+						</div>
+					</el-col>
+					<el-col :span="5">
+						<div class="grid-content bg-purple-dark">
+							<el-button @click="aa" type="primary" icon="el-icon-search">查询</el-button>
+							&nbsp;
+							<el-button type="info">关闭</el-button>
+						</div>
+					</el-col>
+				</el-row>
+			</div>
+			<br>
+			<br>
+			<div class="clientCente">
+				<el-row>
+					<el-col :span="24">
+						<el-table :data="vehicleShow" highlight-current-row @current-change="client_handleCurrentChange" :border="true" height="310px" style="width: 100%" max-height="310">
+							<el-table-column type="index" label="序号" width="150">
+							</el-table-column>
+							<el-table-column prop="vid" label="车编号" width="200">
+							</el-table-column>
+							<el-table-column prop="clientid" label="客户编号" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="license" label="车牌号" width="200">
+							</el-table-column>
+							<el-table-column prop="model" label="车辆型号" width="200">
+							</el-table-column>
+							<el-table-column prop="driver" label="驾驶员" width="200">
+							</el-table-column>
+							<el-table-column prop="driverphone" label="驾驶员电话" width="200">
+							</el-table-column>
+							<el-table-column prop="vehicleownership" label="车辆归属" width="200">
+							</el-table-column>
+							<el-table-column prop="vin" label="车架号" width="200">
+							</el-table-column>
+							<el-table-column prop="enginebrand" label="发动机品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclemodel" label="车辆年款" width="200">
+							</el-table-column>
+							<el-table-column prop="mileage" label="里程" width="200">
+							</el-table-column>
+							<el-table-column prop="load" label="载重" width="200">
+							</el-table-column>
+							<el-table-column prop="carseries" label="车系" width="200">
+							</el-table-column>
+							<el-table-column prop="buydate" label="购买日期" width="200">
+							</el-table-column>
+							<el-table-column prop="registereddate" label="上牌日期" width="200">
+							</el-table-column>
+							<el-table-column prop="citydue" label="车检到期" width="200">
+							</el-table-column>
+							<el-table-column prop="fueltype" label="燃油类型" width="200">
+							</el-table-column>
+							<el-table-column prop="member" label="会员码" width="200">
+							</el-table-column>
+							<el-table-column prop="zip" label="邮编" width="200">
+							</el-table-column>
+							<!--<el-table-column fixed="right" label="操作" width="200">
+								<template slot-scope="scope">
+									<el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+										修改
+									</el-button>
+									<el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+										移除
+									</el-button>
+								</template>
+							</el-table-column>-->
+						</el-table>
+
+					</el-col>
+				</el-row>
+			</div>
+			<br>
+			<br>
+			<div class="clientCente">
+				<el-row>
+					<el-col :span="24">
+						<el-tabs v-model="activeName">
+							<el-tab-pane label="用户信息" name="first">
+								<el-table :data="vehicleClient" :border="true" style="width: 100%" height="200px" max-height="200">
+									<el-table-column type="index" label="序号" width="150">
+									</el-table-column>
+									<el-table-column prop="cid" label="客户编号" width="200">
+									</el-table-column>
+									<el-table-column prop="cname" label="客户名称" width="200">
+									</el-table-column>
+									<el-table-column prop="detailedaddress" label="详细地址" width="200">
+									</el-table-column>
+									<el-table-column prop="linkman" label="联系人" width="200">
+									</el-table-column>
+									<el-table-column prop="phone" label="手机" width="200">
+									</el-table-column>
+									<el-table-column prop="usertype" label="用户类别" width="200">
+									</el-table-column>
+									<el-table-column prop="cardno" label="会员卡号" width="200">
+									</el-table-column>
+									<el-table-column prop="admissiondate" label="入会日期" width="200">
+									</el-table-column>
+									<el-table-column prop="expiredate" label="会员到期" width="200">
+									</el-table-column>
+									<el-table-column prop="remark" label="备注" width="200">
+									</el-table-column>
+									<el-table-column prop="nowdate" label="建档日期" width="200">
+									</el-table-column>
+									<el-table-column prop="integral" label="积分" width="200">
+									</el-table-column>
+									<el-table-column prop="earnest" label="订金余额" width="200">
+									</el-table-column>
+									<!--<el-table-column fixed="right" label="操作" width="200">
+										<template slot-scope="scope">
+											<el-button @click="updateClient(scope.row)" type="text" size="small">
+												修改
+											</el-button>
+											<el-button slot="reference" @click="removeClient(scope.row.cid)" type="text" size="small">
+												移除
+											</el-button>
+										</template>
+									</el-table-column>-->
+								</el-table>
+							</el-tab-pane>
+						</el-tabs>
+					</el-col>
+				</el-row>
+			</div>
+		</div>
+	</body>
+	<!--<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/left.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>-->
+	<script>
+		const carInfosApp = new Vue({
+			el: '#carInfosApp',
+			data() {
+				return {
+					input3: '',
+					activeName: 'first',
+					vehicleShow: [],
+					vehicleClient: []
+				}
+			},
+			mounted() {
+				this.showCarInfos()
+			},
+			methods: {
+				aa() {
+					alert(1)
+				},
+				showCarInfos() {
+					let _this = this
+					axios.get("http://localhost:8080/dzw_sys/api/vehicle/queryAll").then(function(resp) {
+						_this.vehicleShow = resp.data
+					})
+
+				},
+				client_handleCurrentChange(vehicle_Vehicle) {
+					if(vehicle_Vehicle != null) {
+						this.vehicleClient = vehicle_Vehicle.client
+					} else {
+						this.vehicleClient = [];
+					}
+
+				}
+			},
+		})
+	</script>
+
+</html>

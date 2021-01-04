@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>新增维修开单</title>
+	</head>
+
+	<body>
+		<div id="addTestOnCompletion">
+			<el-form :model="TestOnCompletion" :inline="true" class="demo-form-inline">
+
+				<el-form-item label="维修单号">
+					<el-input v-model="TestOnCompletion.repairorder" placeholder="维修单号"></el-input>
+				</el-form-item>
+				<el-form-item label="单据类型">
+					<template>
+						<el-select v-model="TestOnCompletion.typeofdocument" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in typeOfDocumentList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="业务类型">
+					<el-select v-model="TestOnCompletion.businesstype" :popper-append-to-body="false" placeholder="请选择">
+						<el-option v-for="item in businessTypeList" :key="item.values" :label="item.name" :value="item.values">
+						</el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="施工班次">
+					<template>
+						<el-select v-model="TestOnCompletion.constructiondivisions" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in constructionDivisionsList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<br />
+				<el-form-item label="车主姓名">
+					<el-input v-model="TestOnCompletion.ownername" placeholder="车主姓名"></el-input>
+				</el-form-item>
+				<el-form-item label="车牌号">
+					<!--<el-input v-model="TestOnCompletion.licenseplatenumber" placeholder="车牌号"></el-input>-->
+					<el-button type="primary" @click="dialogVisible = true" plain>请选择</el-button>
+					<span>{{TestOnCompletion.licenseplatenumber}}</span>
+					<el-dialog title="提示" :visible.sync="dialogVisible" append-to-body width="70%">
+						<el-table :data="Vehicles" highlight-current-row @current-change="addCars" :border="true" height="310px" style="width: 100%" max-height="310">
+							<el-table-column type="index" label="序号" width="150">
+							</el-table-column>
+							<el-table-column prop="vid" label="车编号" width="200">
+							</el-table-column>
+							<el-table-column prop="clientid" label="客户编号" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="license" label="车牌号" width="200">
+							</el-table-column>
+							<el-table-column prop="model" label="车辆型号" width="200">
+							</el-table-column>
+							<el-table-column prop="driver" label="驾驶员" width="200">
+							</el-table-column>
+							<el-table-column prop="driverphone" label="驾驶员电话" width="200">
+							</el-table-column>
+							<el-table-column prop="vehicleownership" label="车辆归属" width="200">
+							</el-table-column>
+							<el-table-column prop="vin" label="车架号" width="200">
+							</el-table-column>
+							<el-table-column prop="enginebrand" label="发动机品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclemodel" label="车辆年款" width="200">
+							</el-table-column>
+							<el-table-column prop="mileage" label="里程" width="200">
+							</el-table-column>
+							<el-table-column prop="load" label="载重" width="200">
+							</el-table-column>
+							<el-table-column prop="carseries" label="车系" width="200">
+							</el-table-column>
+							<el-table-column prop="buydate" label="购买日期" width="200">
+							</el-table-column>
+							<el-table-column prop="registereddate" label="上牌日期" width="200">
+							</el-table-column>
+							<el-table-column prop="citydue" label="车检到期" width="200">
+							</el-table-column>
+							<el-table-column prop="fueltype" label="燃油类型" width="200">
+							</el-table-column>
+							<el-table-column prop="member" label="会员码" width="200">
+							</el-table-column>
+							<el-table-column prop="zip" label="邮编" width="200">
+							</el-table-column>
+						</el-table>
+					</el-dialog>
+				</el-form-item>
+				<el-form-item label="车型">
+					<template>
+						<el-select v-model="TestOnCompletion.cartype" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in carTypeList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="车架号">
+					<el-input v-model="TestOnCompletion.vin" placeholder="车架号"></el-input>
+				</el-form-item>
+				<br />
+				<el-form-item label="预计完成时间">
+					<el-date-picker v-model="TestOnCompletion.expectedcompletion" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择开始时间">
+				</el-form-item>
+				<el-button type="success" icon="el-icon-check" @click="add" circle></el-button>
+				<br />
+				<el-form-item label="误工原因">
+					<el-input v-model="TestOnCompletion.delaysreason" placeholder="误工原因" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+				<br />
+				<el-form-item label="返工原因">
+					<el-input v-model="TestOnCompletion.reworkreason" placeholder="返工原因" type="textarea" style="width: 1050px;"></el-input>
+				</el-form-item>
+				<br />
+
+			</el-form>
+		</div>
+	</body>
+	<script type="text/javascript">
+		addTestOnCompletion = new Vue({
+			el: "#addTestOnCompletion",
+			data() {
+				return {
+					TestOnCompletion: {
+						repairorder: "",
+						typeofdocument: "",
+						businesstype: "",
+						constructiondivisions: "",
+						ownername: "",
+						licenseplatenumber: "",
+						cartype: "",
+						vin: "",
+						pickupcartime: "",
+						expectedcompletion: "",
+						timeofcompletion: "",
+						delaysreason: "",
+						numberofrework: "",
+						penaltyamount: "",
+						reworkreason: "",
+						thedocumentsstate: ""
+					},
+					OffSiteRescueSheet: {
+						oddnumber: "",
+						carnumbers: "",
+						cartype: "",
+						bland: "",
+						enginebrand: "",
+						vin: "",
+						enginenumber: "",
+						server: "",
+						carownname: "",
+						driver: "",
+						phone: "",
+						milesintothefactory: "",
+						oilintothefactory: "",
+						thelasttimethemileage: "",
+						timeintothefactory: "",
+						classofbusiness: "",
+						constructiondivisions: "",
+						pickone: "",
+						expectedcompletion: "",
+						clearingform: "",
+						indemnitycompany: "",
+						timeofcompletion: "",
+						thelasttimeintothefactory: "",
+						receptionnote: "",
+						repairstatement: "",
+						rescuetheaddress: "",
+						timeofcompletion: "",
+						estimatedamount: "",
+						maintenancenote: "",
+						rescuestatement: ""
+					},
+					RepairBill: {
+						roddnumber: "",
+						carnumbers: "",
+						vin: "",
+						cartype: "",
+						bland: "",
+						enginenumber: "",
+						enginebrand: "",
+						server: "",
+						carownname: "",
+						driver: "",
+						phone: "",
+						milesintothefactory: "",
+						oilintothefactory: "",
+						thelasttimethemileage: "",
+						timeintothefactory: "",
+						classofbusiness: "",
+						constructiondivisions: "",
+						pickone: "",
+						expectedcompletion: "",
+						clearingform: "",
+						indemnitycompany: "",
+						timeofcompletion: "",
+						thelasttimeintothefactory: "",
+						estimatedamount: "",
+						receptionnote: "",
+						repairstatement: ""
+					},
+					typeOfDocumentList: [{
+							values: "救援",
+							name: "救援"
+						},
+						{
+							values: "维修",
+							name: "维修"
+						}
+					],
+					businessTypeList: [{
+							values: "类型一",
+							name: "类型一"
+						},
+						{
+							values: "类型二",
+							name: "类型二"
+						}
+					],
+					constructionDivisionsList: [{
+						values: "白天",
+						name: "白天"
+					}, {
+						values: "中午",
+						name: "中午"
+					}, {
+						values: "晚上",
+						name: "晚上"
+					}],
+					carTypeList: [{
+							values: "型号一",
+							name: "型号一"
+						},
+						{
+							values: "型号二",
+							name: "型号二"
+						},
+						{
+							values: "型号三",
+							name: "型号三"
+						}
+					],
+					time: "",
+					Vehicles: [],
+					Vehicle: {},
+					dialogVisible: false
+				}
+			},
+			methods: {
+				add() {
+					let _This = this;
+					//this.TestOnCompletion.pickupcartime=this.time;
+					_This.TestOnCompletion.penaltyamount = 0;
+					//alert(JSON.stringify(this.TestOnCompletion));
+
+					/*if(_This.TestOnCompletion.typeofdocument == "救援") {
+						_This.$alert("救援");
+					} else if(_This.TestOnCompletion.typeofdocument == "维修") {
+						_This.$alert("维修");
+
+					}*/
+					//return false;
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/testOnCompletion/add`, _This.TestOnCompletion).then(function(success) {
+						if(success.data == "1") {
+
+							/*_This.$alert("success");
+							testOnCompletion.getTestOnCompletionInfos();
+							_This.isShow = false;*/
+							if(_This.TestOnCompletion.typeofdocument == "救援") {
+								_This.addOffSiteRescueSheet();
+							} else if(_This.TestOnCompletion.typeofdocument == "维修") {
+								//_This.$alert("维修");
+								_This.addRepairBill();
+							}
+
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				addOffSiteRescueSheet() {
+					let _This = this;
+					_This.OffSiteRescueSheet.oddnumber = _This.TestOnCompletion.repairorder;
+					_This.OffSiteRescueSheet.classofbusiness = _This.TestOnCompletion.businesstype;
+					_This.OffSiteRescueSheet.constructiondivisions = _This.TestOnCompletion.constructiondivisions;
+					_This.OffSiteRescueSheet.carownname = _This.TestOnCompletion.ownername;
+					_This.OffSiteRescueSheet.carnumbers = _This.TestOnCompletion.licenseplatenumber;
+					_This.OffSiteRescueSheet.cartype = _This.TestOnCompletion.cartype;
+					_This.OffSiteRescueSheet.vin = _This.TestOnCompletion.vin;
+					_This.OffSiteRescueSheet.expectedcompletion = _This.TestOnCompletion.expectedcompletion;
+					/*this.$alert(JSON.stringify(_This.OffSiteRescueSheet));
+					return false;*/
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/offSiteRescueSheet/add`, _This.OffSiteRescueSheet).then(function(success) {
+						if(success.data == 1) {
+							_This.$alert("success");
+							testOnCompletion.getTestOnCompletionInfos();
+							testOnCompletion.isShow = false;
+						} else {
+							//_This.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				addRepairBill() {
+					let _This = this;
+					_This.RepairBill.roddnumber = _This.TestOnCompletion.repairorder;
+					_This.RepairBill.classofbusiness = _This.TestOnCompletion.businesstype;
+					_This.RepairBill.constructiondivisions = _This.TestOnCompletion.constructiondivisions;
+					_This.RepairBill.ownername = _This.TestOnCompletion.ownername;
+					_This.RepairBill.carnumbers = _This.TestOnCompletion.licenseplatenumber;
+					_This.RepairBill.cartype = _This.TestOnCompletion.cartype;
+					_This.RepairBill.vin = _This.TestOnCompletion.vin;
+					_This.RepairBill.expectedcompletion = _This.TestOnCompletion.expectedcompletion;
+					/*this.$alert(JSON.stringify(_This.RepairBill));
+					return false;*/
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/repairBill/add`, _This.RepairBill).then(function(success) {
+						if(success.data == 1) {
+							_This.$alert("success");
+							testOnCompletion.getTestOnCompletionInfos();
+							testOnCompletion.isShow = false;
+						} else {
+							//_This.$alert("error");
+						}
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				addCars(row) {
+					this.Vehicle = row;
+					//this.$alert(JSON.stringify(row));
+					this.TestOnCompletion.licenseplatenumber = row.license;
+					this.TestOnCompletion.vin = row.vin;
+					this.TestOnCompletion.ownername = row.driver;
+					this.dialogVisible = false;
+				},
+				getVehicleInfos() {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicle/queryAll`).then(function(success) {
+						_This.Vehicles = success.data;
+						console.log(_This.Vehicles);
+					}).catch(function(error) {
+						console.log(error);
+					});
+				}
+			},
+			mounted() {
+				var newDate = new Date();
+				this.time = newDate.getFullYear() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getDate();
+				this.getVehicleInfos();
+			}
+		});
+	</script>
+
+</html>

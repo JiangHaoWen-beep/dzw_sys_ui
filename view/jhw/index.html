@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<script type="text/javascript" src="../../js/view_filter.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+		<link rel="stylesheet" href="../../css/element.css" />
+		<style>
+			.el-header,
+			.el-footer {
+				background-color: #0067C0;
+				color: #333;
+				line-height: 60px;
+			}
+			
+			.el-aside {
+				padding: 5px;
+				background-color: #D3DCE6;
+				color: #333;
+				/*line-height: 200px;*/
+			}
+			
+			.el-main {
+				background-color: #E9EEF3;
+				color: #333;
+			}
+			
+			body>.el-container {
+				margin-bottom: 40px;
+			}
+			
+			.el-container:nth-child(5) .el-aside,
+			.el-container:nth-child(6) .el-aside {
+				line-height: 260px;
+			}
+			
+			.el-container:nth-child(7) .el-aside {
+				line-height: 320px;
+			}
+			
+			.el-header {
+				color: white;
+				font-weight: bold;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+			}
+			
+			.el-menu {
+				border-right: none;
+				min-height: 95%;
+			}
+			
+			.el-icon-user {
+				color: white;
+				font-size: 18px;
+			}
+			
+			.tab-content {
+				background: white;
+				min-height: 90%;
+				padding: 30px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="index">
+			<el-header style="font-size: 12px">
+				<div>
+					<span style="font-size: 18px;">汽修管理系统</span>
+				</div>
+				<div>
+					<el-dropdown>
+						<i class="el-icon-user" style="margin-right: 15px"></i>
+						<el-dropdown-menu slot="dropdown">
+							<el-dropdown-item>用户名： {{employee.yname}}
+							</el-dropdown-item>
+							<el-dropdown-item>
+								<el-button type="success" size="small" @click="loginout">退出登录</el-button>
+							</el-dropdown-item>
+						</el-dropdown-menu>
+					</el-dropdown>
+				</div>
+			</el-header>
+			<el-container style="height:90vh; border: 1px solid #eee">
+				<el-aside width="230px">
+					<el-menu>
+						<el-menu>
+							 <el-submenu v-for="(item,index) in options" :key="index" :index="(index+1)+''">
+								<template slot="title">
+									<i class="el-icon-user"></i>
+									<span>{{item.text}}</span>
+								</template>
+								<el-menu-item-group>
+									<el-menu-item v-for="(temp,i) in item.children" :key="i" :index="(index+1)+'-'+(i+1)" @click="addTab(editableTabsValue,temp.text,temp.id)">
+										<i class="el-icon-message"></i>{{temp.text}}
+									</el-menu-item>
+								</el-menu-item-group>
+							</el-submenu> 
+						</el-menu>
+					</el-menu>
+				</el-aside>
+				<el-container>
+					<el-main>
+						<div class="tab-content">
+							 <el-tabs v-model="editableTabsValue" type="card" closable @tab-remove="removeTab">
+								<el-tab-pane v-for="(item, index) in editableTabs" :key="item.name" :label="item.title" :name="item.name">
+									<div :id="item.name"></div>
+								</el-tab-pane>
+							</el-tabs> 
+						</div>
+					</el-main>
+				</el-container>
+			</el-container>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/menu_const.js"></script>
+	<script>
+		var index = new Vue({
+			el: "#index",
+			data: {
+				options: [],
+				activeIndex: '1',
+				editableTabsValue: '',
+				editableTabs: [],
+				tabIndex: '',
+				employee: JSON.parse(sessionStorage.getItem("EMPLOYEE"))
+			},
+			methods: {
+				addTab(targetName, title, url) {
+					for(i = 0; i < this.editableTabs.length; i++) {
+						if(title == this.editableTabs[i].title) {
+							this.editableTabsValue = this.editableTabs[i].name;
+							return;
+						}
+					}
+					let newTabName = ++this.tabIndex + '';
+					this.editableTabs.push({
+						title: title,
+						name: newTabName,
+						content: ''
+					});
+					this.editableTabsValue = newTabName;
+					this.$nextTick(() => {
+						$(`#${newTabName}`).load(menuMapping[url]);
+					})
+				},
+				removeTab(targetName) {
+					if(targetName == 1) {
+						return;
+					}
+					let tabs = this.editableTabs;
+					let activeName = this.editableTabsValue;
+					if(activeName === targetName) {
+						tabs.forEach((tab, index) => {
+							if(tab.name === targetName) {
+								let nextTab = tabs[index + 1] || tabs[index - 1];
+								if(nextTab) {
+									activeName = nextTab.name;
+								}
+							}
+						});
+					}
+					this.editableTabsValue = activeName;
+					this.editableTabs = tabs.filter(tab => tab.name !== targetName);
+				},
+				loginout() {
+					
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/loginout`).then(resp => {
+						if(resp.data.code == "200") {
+							location.href = "login.html";
+						}
+					})
+				}
+
+			},
+			mounted() {
+				this.addTab(this.editableTabsValue, '首页', 'sy001');
+				axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/getFunTree`).then(resp => {
+					this.options = resp.data;
+				})
+			}
+		})
+	</script>
+
+</html>

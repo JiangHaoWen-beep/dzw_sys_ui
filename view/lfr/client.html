@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Document</title>
+		<style>
+			#clientApp {
+				zoom: 0.8;
+			}
+			
+			.dialog_zoom {
+				zoom: 0.8;
+			}
+			
+			.clientCente {
+				background-color: #fafafa;
+			}
+		</style>
+		<!--<link rel="stylesheet" href="../../css/element.css">-->
+	</head>
+
+	<body>
+		<div id="clientApp">
+			<div>
+				<el-row>
+					<el-col :span="4">
+						<div class="grid-content bg-purple-dark">
+							<span style="font-size: 25px;">客户档案</span>
+						</div>
+					</el-col>
+					<el-col :span="5">
+						<div class="grid-content bg-purple-dark">
+							&nbsp;
+						</div>
+					</el-col>
+					<el-col :span="9">
+						&nbsp;
+					</el-col>
+					<el-col :span="6">
+						<div class="grid-content bg-purple-dark">
+							<el-button type="success" @click="addDialog" icon="el-icon-plus">添加</el-button>
+							&nbsp;
+							<el-button type="info">关闭</el-button>
+						</div>
+					</el-col>
+				</el-row>
+			</div>
+			<div>
+				<el-dialog title="用户添加" :visible.sync="dialogVisible" width="60%" :before-close="handleClose">
+					<!--@close="closeObject('client_vehicles3')"-->
+					<div id="addClient">
+						<el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+							<el-row>
+								<el-col :span="8">
+									<el-form-item label="客户编号" prop="cId">
+										<el-input v-model="ruleForm.cId" disabled></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="客户名称" prop="cName">
+										<el-input v-model="ruleForm.cName"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="联系人" prop="linkman">
+										<el-input v-model="ruleForm.linkman"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="8">
+									<el-form-item label="手机" prop="phone">
+										<el-input v-model="ruleForm.phone"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="用户类别" prop="userType">
+										<el-select v-model="ruleForm.userType" :popper-append-to-body="false" clearable placeholder="请选择">
+											<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+											</el-option>
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="详细地址" prop="detailedAddress">
+										<el-input v-model="ruleForm.detailedAddress"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="24">
+									<el-form-item label="备注" prop="remark">
+										<el-input type="textarea" v-model="ruleForm.remark"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="3">
+									<h3 style="line-height: 40px;">车资料：</h3>
+								</el-col>
+								<el-col :span="18">&nbsp;</el-col>
+								<el-col :span="3">
+									<h3 style="line-height: 40px;">
+										<el-button type="primary" icon="el-icon-plus" @click="carInfosFormAdd('ruleForm')">添加车辆</el-button>
+									</h3>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="24">
+									<el-table :data="ruleForm.vehicles" :border="true" style="width: 100%" max-height="200">
+										<el-table-column prop="clientid" label="客户编号" width="200">
+										</el-table-column>
+										<el-table-column prop="license" label="车牌号" width="200">
+										</el-table-column>
+										<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+										</el-table-column>
+										<el-table-column prop="driver" label="驾驶员" width="200">
+										</el-table-column>
+										<el-table-column label="操作" width="206">
+											<template slot-scope="scope">
+												<el-button @click.native.prevent="updateCheliang(scope.$index, scope.row)" type="text" size="small">
+													修改
+												</el-button>
+												<el-button @click.native.prevent="deleteVehicles(scope.$index)" type="text" size="small">
+													移除
+												</el-button>
+											</template>
+										</el-table-column>
+									</el-table>
+								</el-col>
+							</el-row>
+							<el-form-item prop="vehicles"></el-form-item>
+							<el-row>
+								<el-col :span="8">&nbsp;</el-col>
+								<el-col :span="8">
+									<el-form-item>
+										<el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+										<el-button @click="dialogVisible = false">关闭</el-button>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">&nbsp;</el-col>
+							</el-row>
+						</el-form>
+					</div>
+				</el-dialog>
+			</div>
+			<div class="">
+				<el-dialog class="dialog_zoom" width="70%" title="车辆添加" center :visible.sync="innerVisible" append-to-body>
+					<el-form :model="client_vehicles3" :rules="rules" ref="client_vehicles3" label-width="100px" class="demo-ruleForm">
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="客户编号" prop="clientid">
+									<el-input v-model="client_vehicles3.clientid" disabled></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车牌号" prop="license">
+									<el-input v-model="client_vehicles3.license"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="驾驶员" prop="driver">
+									<el-input v-model="client_vehicles3.driver"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="车辆品牌" prop="vehiclebrand">
+									<el-select v-model="client_vehicles3.vehiclebrand" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in VehicleBrand" :key="item.vbrandname" :label="item.vbrandname" :value="item.vbrandname">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆型号" prop="model">
+									<el-select v-model="client_vehicles3.model" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in VehicleType" :key="item.vtypename" :label="item.vtypename" :value="item.vtypename">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="驾驶员电话" prop="driverphone">
+									<el-input v-model="client_vehicles3.driverphone"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="燃油类型" prop="fueltype">
+									<el-select v-model="client_vehicles3.fueltype" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option value="汽油">
+											汽油
+										</el-option>
+										<el-option value="柴油">
+											柴油
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="发动机品牌" prop="enginebrand">
+									<el-select v-model="client_vehicles3.enginebrand" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in EngineType" :key="item.enginetypename" :label="item.enginetypename" :value="item.enginetypename">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆归属" prop="vehicleownership">
+									<el-select v-model="client_vehicles3.vehicleownership" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option value="湘">
+											湘
+										</el-option>
+										<el-option value="蒙">
+											蒙
+										</el-option>
+										<el-option value="辽">
+											辽
+										</el-option>
+										<el-option value="吉">
+											吉
+										</el-option>
+										<el-option value="黑">
+											黑
+										</el-option>
+										<el-option value="苏">
+											苏
+										</el-option>
+										<el-option value="浙">
+											浙
+										</el-option>
+										<el-option value="冀">
+											冀
+										</el-option>
+										<el-option value="晋">
+											晋
+										</el-option>
+										<el-option value="皖">
+											皖
+										</el-option>
+										<el-option value="闽">
+											闽
+										</el-option>
+										<el-option value="川">
+											川
+										</el-option>
+										<el-option value="贵">
+											贵
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="车架号" prop="VIN">
+									<el-input v-model="client_vehicles3.VIN"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车系" prop="carseries">
+									<el-input v-model="client_vehicles3.carseries"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆年款" prop="vehiclemodel">
+									<el-input v-model="client_vehicles3.vehiclemodel"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="里程" prop="mileage">
+									<el-input v-model="client_vehicles3.mileage"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="载重" prop="load">
+									<el-input v-model="client_vehicles3.load"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车检到期" prop="citydue">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehicles3.citydue" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="购买日期" prop="buydate">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehicles3.buydate" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="上牌日期" prop="registereddate">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehicles3.registereddate" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">&nbsp;</el-col>
+							<el-col :span="8">
+								<el-form-item>
+									<el-button type="primary" @click="submitFormVehicles('client_vehicles3')">立即添加</el-button>
+									<el-button @click="innerVisible = false">关闭</el-button>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">&nbsp;</el-col>
+						</el-row>
+					</el-form>
+				</el-dialog>
+			</div>
+			<div class="">
+				<el-dialog class="dialog_zoom" width="70%" title="车辆修改" center :visible.sync="innerVisible2" append-to-body>
+					<el-form :model="client_vehiclesUpdate" :rules="rules" ref="client_vehiclesUpdate" label-width="100px" class="demo-ruleForm">
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="客户编号" prop="clientid">
+									<el-input v-model="client_vehiclesUpdate.clientid" disabled></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车牌号" prop="license">
+									<el-input v-model="client_vehiclesUpdate.license"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="驾驶员" prop="driver">
+									<el-input v-model="client_vehiclesUpdate.driver"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="车辆品牌" prop="vehiclebrand">
+									<el-select v-model="client_vehiclesUpdate.vehiclebrand" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in VehicleBrand" :key="item.vbrandname" :label="item.vbrandname" :value="item.vbrandname">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆型号" prop="model">
+									<el-select v-model="client_vehiclesUpdate.model" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in VehicleType" :key="item.vtypename" :label="item.vtypename" :value="item.vtypename">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="驾驶员电话" prop="driverphone">
+									<el-input v-model="client_vehiclesUpdate.driverphone"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="燃油类型" prop="fueltype">
+									<el-select v-model="client_vehiclesUpdate.fueltype" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option value="汽油">
+											汽油
+										</el-option>
+										<el-option value="柴油">
+											柴油
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="发动机品牌" prop="enginebrand">
+									<el-select v-model="client_vehiclesUpdate.enginebrand" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option v-for="item in EngineType" :key="item.enginetypename" :label="item.enginetypename" :value="item.enginetypename">
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆归属" prop="vehicleownership">
+									<el-select v-model="client_vehiclesUpdate.vehicleownership" :popper-append-to-body="false" clearable placeholder="请选择">
+										<el-option value="湘">
+											湘
+										</el-option>
+										<el-option value="蒙">
+											蒙
+										</el-option>
+										<el-option value="辽">
+											辽
+										</el-option>
+										<el-option value="吉">
+											吉
+										</el-option>
+										<el-option value="黑">
+											黑
+										</el-option>
+										<el-option value="苏">
+											苏
+										</el-option>
+										<el-option value="浙">
+											浙
+										</el-option>
+										<el-option value="冀">
+											冀
+										</el-option>
+										<el-option value="晋">
+											晋
+										</el-option>
+										<el-option value="皖">
+											皖
+										</el-option>
+										<el-option value="闽">
+											闽
+										</el-option>
+										<el-option value="川">
+											川
+										</el-option>
+										<el-option value="贵">
+											贵
+										</el-option>
+									</el-select>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="车架号" prop="VIN">
+									<el-input v-model="client_vehiclesUpdate.VIN"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车系" prop="carseries">
+									<el-input v-model="client_vehiclesUpdate.carseries"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车辆年款" prop="vehiclemodel">
+									<el-input v-model="client_vehiclesUpdate.vehiclemodel"></el-input>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="里程" prop="mileage">
+									<el-input v-model="client_vehiclesUpdate.mileage"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="载重" prop="load">
+									<el-input v-model="client_vehiclesUpdate.load"></el-input>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="车检到期" prop="citydue">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehiclesUpdate.citydue" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">
+								<el-form-item label="购买日期" prop="buydate">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehiclesUpdate.buydate" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+								<el-form-item label="上牌日期" prop="registereddate">
+									<el-date-picker :popper-append-to-body="false" v-model="client_vehiclesUpdate.registereddate" type="date" placeholder="选择日期">
+									</el-date-picker>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">
+
+							</el-col>
+						</el-row>
+						<el-row>
+							<el-col :span="8">&nbsp;</el-col>
+							<el-col :span="8">
+								<el-form-item>
+									<el-button type="primary" @click="updateFormVehicles('client_vehiclesUpdate')">修改</el-button>
+									<el-button @click="innerVisible2 = false">关闭</el-button>
+								</el-form-item>
+							</el-col>
+							<el-col :span="8">&nbsp;</el-col>
+						</el-row>
+					</el-form>
+				</el-dialog>
+			</div>
+			<div>
+				<el-dialog title="用户修改" :visible.sync="dialogVisible2" width="60%" :before-close="handleClose2">
+					<div id="addClient">
+						<el-form :model="updateClientData" :rules="rules" ref="updateClientData" label-width="100px" class="demo-ruleForm">
+							<el-row>
+								<el-col :span="8">
+									<el-form-item label="客户编号" prop="cid">
+										<el-input v-model="updateClientData.cid" disabled></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="客户名称" prop="cname">
+										<el-input v-model="updateClientData.cname"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="联系人" prop="linkman">
+										<el-input v-model="updateClientData.linkman"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="8">
+									<el-form-item label="手机" prop="phone">
+										<el-input v-model="updateClientData.phone"></el-input>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="用户类别" prop="usertype">
+										<el-select v-model="updateClientData.usertype" :popper-append-to-body="false" clearable placeholder="请选择">
+											<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+											</el-option>
+										</el-select>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">
+									<el-form-item label="详细地址" prop="detailedaddress">
+										<el-input v-model="updateClientData.detailedAddress"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="24">
+									<el-form-item label="备注" prop="remark">
+										<el-input type="textarea" v-model="updateClientData.remark"></el-input>
+									</el-form-item>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="3">
+									<h3 style="line-height: 40px;">车资料：</h3>
+								</el-col>
+								<el-col :span="18">&nbsp;</el-col>
+								<el-col :span="3">
+									<h3 style="line-height: 40px;">
+										<el-button type="primary" icon="el-icon-plus" @click="carInfosFormAdd2('updateClientData')">添加车辆</el-button>
+									</h3>
+								</el-col>
+							</el-row>
+							<el-row>
+								<el-col :span="24">
+									<el-table :data="updateClientData.vehicles" :border="true" style="width: 100%" max-height="200">
+										<el-table-column prop="clientid" label="客户编号" width="200">
+										</el-table-column>
+										<el-table-column prop="license" label="车牌号" width="200">
+										</el-table-column>
+										<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+										</el-table-column>
+										<el-table-column prop="driver" label="驾驶员" width="200">
+										</el-table-column>
+										<el-table-column label="操作" width="206">
+											<template slot-scope="scope">
+												<el-button @click.native.prevent="updateCheliang(scope.$index, scope.row)" type="text" size="small">
+													修改
+												</el-button>
+												<el-button @click.native.prevent="deleteVehicles2(scope.$index)" type="text" size="small">
+													移除
+												</el-button>
+											</template>
+										</el-table-column>
+									</el-table>
+								</el-col>
+							</el-row>
+							<el-form-item prop="vehicles"></el-form-item>
+							<el-row>
+								<el-col :span="8">&nbsp;</el-col>
+								<el-col :span="8">
+									<el-form-item>
+										<el-button type="primary" @click="updateSubmitForm('updateClientData')">立即更新</el-button>
+										<el-button @click="dialogVisible2 = false">关闭</el-button>
+									</el-form-item>
+								</el-col>
+								<el-col :span="8">&nbsp;</el-col>
+							</el-row>
+						</el-form>
+					</div>
+				</el-dialog>
+			</div>
+			<br>
+			<div class="clientCente">
+				<el-row>
+					<el-col :span="24">
+						<el-table :data="client_Client" :border="true" highlight-current-row @current-change="client_handleCurrentChange" style="width: 100%" height="310px" max-height="310">
+							<el-table-column type="index" label="序号" width="150">
+							</el-table-column>
+							<el-table-column prop="cid" label="客户编号" width="200">
+							</el-table-column>
+							<el-table-column prop="cname" label="客户名称" width="200">
+							</el-table-column>
+							<el-table-column prop="detailedaddress" label="详细地址" width="200">
+							</el-table-column>
+							<el-table-column prop="linkman" label="联系人" width="200">
+							</el-table-column>
+							<el-table-column prop="phone" label="手机" width="200">
+							</el-table-column>
+							<el-table-column prop="usertype" label="用户类别" width="200">
+							</el-table-column>
+							<el-table-column prop="cardno" label="会员卡号" width="200">
+							</el-table-column>
+							<el-table-column prop="admissiondate" label="入会日期" width="200">
+							</el-table-column>
+							<el-table-column prop="remark" label="备注" width="200">
+							</el-table-column>
+							<el-table-column prop="nowdate" label="建档日期" width="200">
+							</el-table-column>
+							<el-table-column prop="integral" label="积分" width="200">
+							</el-table-column>
+							<el-table-column prop="earnest" label="订金余额" width="200">
+							</el-table-column>
+							<el-table-column fixed="right" label="操作" width="200">
+								<template slot-scope="scope">
+									<el-button @click="updateClient(scope.row)" type="text" size="small">
+										修改
+									</el-button>
+									<el-button slot="reference" @click="removeClient(scope.row.cid)" type="text" size="small">
+										移除
+									</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-col>
+				</el-row>
+			</div>
+			<br>
+			<div class="clientCente">
+				<el-row>
+					<el-col :span="24">
+						<el-table :data="client_vehicles" highlight-current-row @row-dblclick="doubleClickShowContents" :border="true" style="width: 100%">
+							<el-table-column type="index" label="序号" width="150">
+							</el-table-column>
+							<el-table-column prop="vid" label="车编号" width="200">
+							</el-table-column>
+							<el-table-column prop="clientid" label="客户编号" width="200">
+							</el-table-column>
+							<el-table-column prop="license" label="车牌号" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclebrand" label="车辆品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="model" label="车辆型号" width="200">
+							</el-table-column>
+							<el-table-column prop="driver" label="驾驶员" width="200">
+							</el-table-column>
+							<el-table-column prop="driverphone" label="驾驶员电话" width="200">
+							</el-table-column>
+							<el-table-column prop="vehicleownership" label="车辆归属" width="200">
+							</el-table-column>
+							<el-table-column prop="vin" label="车架号" width="200">
+							</el-table-column>
+							<el-table-column prop="enginebrand" label="发动机品牌" width="200">
+							</el-table-column>
+							<el-table-column prop="vehiclemodel" label="车辆年款" width="200">
+							</el-table-column>
+							<el-table-column prop="mileage" label="里程" width="200">
+							</el-table-column>
+							<el-table-column prop="load" label="载重" width="200">
+							</el-table-column>
+							<el-table-column prop="carseries" label="车系" width="200">
+							</el-table-column>
+							<el-table-column prop="buydate" label="购买日期" width="200">
+							</el-table-column>
+							<el-table-column prop="registereddate" label="上牌日期" width="200">
+							</el-table-column>
+							<el-table-column prop="citydue" label="车检到期" width="200">
+							</el-table-column>
+							<el-table-column prop="fueltype" label="燃油类型" width="200">
+							</el-table-column>
+							<el-table-column prop="zip" label="邮编" width="200">
+							</el-table-column>
+							<el-table-column fixed="right" label="操作" width="200">
+								<template slot-scope="scope">
+									<el-button @click="updateCheliang2(scope.$index,scope.row)" type="text" size="small">
+										修改
+									</el-button>
+									<el-button @click="rmoveVehicles(scope.$index,scope.row.vid)" type="text" size="small">
+										移除
+									</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</el-col>
+				</el-row>
+			</div>
+			<el-dialog title="维修历史" :visible.sync="isShow" width="80%">
+				<el-table :data="MaintenanceItems" style="width: 100%">
+					<el-table-column type="expand">
+						<template slot-scope="props">
+							<el-form label-position="left" inline class="demo-table-expand">
+								<el-form-item label="数量">
+									<span>{{ props.row.number }}</span>
+								</el-form-item>
+								<el-form-item label="价类">
+									<span>{{ props.row.priceclass }}</span>
+								</el-form-item>
+								<el-form-item label="单价">
+									<span>{{ props.row.unitprice}}</span>
+								</el-form-item>
+								<el-form-item label="技师结算价">
+									<span>{{ props.row.settlementprice }}</span>
+								</el-form-item>
+								<el-form-item label="故障描述">
+									<span>{{ props.row.errordesc }}</span>
+								</el-form-item>
+								<el-form-item label="故障原因">
+									<span>{{ props.row.errorcause }}</span>
+								</el-form-item>
+								<el-form-item label="维修班组">
+									<span>{{ props.row.themaintenancecrew }}</span>
+								</el-form-item>
+								<el-form-item label="作业人员">
+									<span>{{ props.row.busyworkgroup }}</span>
+								</el-form-item>
+								<el-form-item label="服务顾问">
+									<span>{{ props.row.server }}</span>
+								</el-form-item>
+								<el-form-item label="工单号">
+									<span>{{ props.row.workordernumber }}</span>
+								</el-form-item>
+								<el-form-item label="免单原因">
+									<span>{{ props.row.freeofchargefor }}</span>
+								</el-form-item>
+							</el-form>
+						</template>
+					</el-table-column>
+					<el-table-column label="项目编号" prop="oid">
+					</el-table-column>
+					<el-table-column label="项目名称" prop="oname">
+					</el-table-column>
+					<el-table-column label="金额" prop="money">
+					</el-table-column>
+				</el-table>
+			</el-dialog>
+		</div>
+	</body>
+	<!--<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/left.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script type="text/javascript" src="../../js/echarts.min.js"></script>-->
+	<script>
+		const clientApp = new Vue({
+			el: '#clientApp',
+			data: {
+				input3: '',
+				statisUpdate: 0,
+				activeName: 'first',
+				isShow: false,
+				client_Client: [],
+				updateIndex: 0,
+				client_vehicles: [],
+				//新增车资料
+				client_vehicles3: {
+					clientid: '',
+					license: '',
+					vehiclebrand: '',
+					model: '',
+					driver: '',
+					driverphone: '',
+					vehicleownership: '',
+					VIN: '',
+					engine: '',
+					enginebrand: '',
+					vehiclemodel: '',
+					mileage: '',
+					load: '',
+					carseries: '',
+					buydate: '',
+					registereddate: '',
+					citydue: '',
+					fueltype: '',
+					member: ''
+				},
+				//修改车辆对象
+				client_vehiclesUpdate: {},
+				//新增用户对象
+				ruleForm: {
+					cId: '',
+					cName: '',
+					detailedAddress: '',
+					linkman: '',
+					phone: '',
+					userType: '普通用户',
+					remark: '',
+					vehicles: []
+				},
+				options: [{
+					value: '普通用户',
+					label: '普通用户'
+				}, {
+					value: '员工',
+					label: '员工'
+				}],
+				EngineType: [{
+						enginetypeid: '1',
+						enginetypename: '中国重汽动力'
+					},
+					{
+						enginetypeid: '2',
+						enginetypename: '柯索发动机'
+					},
+					{
+						enginetypeid: '3',
+						enginetypename: '道依茨发动机'
+					},
+					{
+						enginetypeid: '4',
+						enginetypename: '西安康明斯'
+					}
+				],
+				VehicleBrand: [{
+						vbrandid: 1,
+						vbrandno: "101",
+						vbrandname: "宝马"
+					},
+					{
+						vbrandid: 2,
+						vbrandno: "102",
+						vbrandname: "奔驰"
+					},
+					{
+						vbrandid: 3,
+						vbrandno: "103",
+						vbrandname: "一汽大众"
+					},
+				],
+				VehicleType: [{
+						vtypeid: '',
+						vtypename: 'CA7200'
+					},
+					{
+						vtypeid: '',
+						vtypename: 'BJ2020SJ '
+					},
+					{
+						vtypeid: '',
+						vtypename: 'TJ7131U'
+					},
+					{
+						vtypeid: '',
+						vtypename: 'EQ1092 '
+					},
+				],
+				value: '',
+				dialogVisible: false,
+				dialogVisible2: false,
+				innerVisible: false,
+				innerVisible2: false,
+				rules: {
+					cId: [{
+						required: true,
+						message: '',
+						trigger: 'blur'
+					}],
+					cName: [{
+						required: true,
+						message: '请输入客户名称',
+						trigger: 'blur'
+					}],
+					cname: [{
+						required: true,
+						message: '请输入客户名称',
+						trigger: 'blur'
+					}],
+					linkman: [{
+						required: true,
+						message: '请输入联系人',
+						trigger: 'blur'
+					}],
+					phone: [{
+						required: true,
+						message: '请输入电话',
+						trigger: 'blur'
+					}],
+					license: [{
+						required: true,
+						message: '请输入车牌',
+						trigger: 'blur'
+					}],
+					vehiclebrand: [{
+						required: true,
+						message: '请选择车辆品牌',
+						trigger: 'blur'
+					}],
+					model: [{
+						required: true,
+						message: '请选择车辆型号',
+						trigger: 'blur'
+					}],
+					clientid: [{
+						required: true,
+						message: '',
+						trigger: 'blur'
+					}],
+					vehicleownership: [{
+						required: true,
+						message: '请选择车辆归属',
+						trigger: 'blur'
+					}],
+					engine: [{
+						required: true,
+						message: '请选择发动机',
+						trigger: 'blur'
+					}],
+					enginebrand: [{
+						required: true,
+						message: '请选择发动机品牌',
+						trigger: 'blur'
+					}],
+					driver: [{
+						required: true,
+						message: '请输入驾驶员',
+						trigger: 'blur'
+					}],
+					driverphone: [{
+						required: true,
+						message: '请输入驾驶员电话',
+						trigger: 'blur'
+					}]
+				},
+				//修改用户，车资料
+				updateClientData: {},
+				MaintenanceItems: []
+			},
+			methods: {
+				//双击车资料打开历史维修项目
+				doubleClickShowContents(row) {
+					this.isShow = true
+					//alert(row.license)
+					let _This = this;
+					//历史维修记录
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/carNum/${row.license}`).then(function(success) {
+						_This.MaintenanceItems = success.data;
+						console.log(_This.MaintenanceItems);
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				//修改车资料
+				updateFormVehicles(formName) {
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							if(this.statisUpdate == 1) {
+								this.$set(this.ruleForm.vehicles, this.updateIndex, this.client_vehiclesUpdate)
+							} else if(this.statisUpdate == 2) {
+								this.$set(this.updateClientData.vehicles, this.updateIndex, this.client_vehiclesUpdate)
+							} else {
+								let _this = this
+								this.$set(this.client_vehicles, this.updateIndex, this.client_vehiclesUpdate)
+								axios.put("http://localhost:8080/dzw_sys/api/vehicle/updateVehicle", this.client_vehiclesUpdate).then(function(resp) {
+									if(resp.data) {
+										//_this.showClient();
+										_this.dialogVisible2 = false
+									} else {
+										_this.$message({
+											message: '修改失败！',
+											type: 'error'
+										});
+									}
+								})
+							}
+							this.innerVisible2 = false
+							this.$message({
+								message: '修改成功！',
+								type: 'success'
+							});
+						} else {
+							return false;
+						}
+					});
+				},
+				//打开车资料修改页面
+				updateCheliang(index, data) {
+					this.updateIndex = index
+					this.client_vehiclesUpdate = JSON.parse(JSON.stringify(data))
+					this.innerVisible2 = true
+				},
+				//子表点击修改
+				updateCheliang2(index, data) {
+					this.updateIndex = index
+					this.client_vehiclesUpdate = JSON.parse(JSON.stringify(data))
+					this.statisUpdate = 3
+					this.innerVisible2 = true
+				},
+				//查询方法
+				aa() {
+					alert(1)
+				},
+				//修改页面删除子表数组
+				deleteVehicles2(index) {
+					this.$confirm('是否删除?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						this.updateClientData.vehicles.splice(index, 1)
+						this.$message({
+							message: '移除成功！',
+							type: 'success'
+						});
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '移除取消'
+						});
+					});
+
+				},
+				//新增用户页面删除子表数组
+				deleteVehicles(index) {
+					this.$confirm('是否删除?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						this.ruleForm.vehicles.splice(index, 1)
+						this.$message({
+							message: '移除成功！',
+							type: 'success'
+						});
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '移除取消'
+						});
+					});
+
+				},
+				//打开用户修改页面
+				updateClient(client) {
+					this.updateClientData = JSON.parse(JSON.stringify(client));
+					this.dialogVisible2 = true
+					this.statisUpdate = 2
+				},
+				rmoveVehicles(index, id) {
+					this.$confirm('是否删除?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						this.client_vehicles.splice(index, 1)
+						let _this = this
+						axios.delete("http://localhost:8080/dzw_sys/api/vehicle/removeVehicle/" + id).then(function(resp) {
+							if(resp.data) {
+								_this.$message({
+									message: '删除成功！',
+									type: 'success'
+								});
+							}
+						})
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				},
+				//删除用户
+				removeClient(cid) {
+					let _this = this;
+					this.$confirm('是否删除?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						axios.delete("http://localhost:8080/dzw_sys/api/client/removeClient/" + cid).then(function(resp) {
+							if(resp.data) {
+								_this.showClient();
+								_this.$message({
+									message: '删除成功！',
+									type: 'success'
+								});
+							}
+						})
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				},
+				//点击用户查看车辆
+				client_handleCurrentChange(client_Client2) {
+					if(client_Client2 != null) {
+						this.client_vehicles = client_Client2.vehicles
+					} else {
+						this.client_vehicles = [];
+					}
+
+				},
+				//查询信息
+				showClient() {
+					let _this = this
+					axios.get("http://localhost:8080/dzw_sys/api/client/selectAll").then(function(resp) {
+						_this.client_Client = resp.data
+					})
+				},
+				//新增用户提交
+				submitForm(formName) {
+					let _this = this;
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							axios.post("http://localhost:8080/dzw_sys/api/client/add", _this.ruleForm).then(function(resp) {
+								if(resp.data) {
+									_this.showClient();
+									_this.dialogVisible = false
+									_this.$message({
+										message: '新增成功！',
+										type: 'success'
+									});
+								}
+							})
+						} else {
+							return false;
+						}
+					});
+				},
+				//添加车资料
+				submitFormVehicles(formName) {
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							if(this.statisUpdate == 1) {
+								this.ruleForm.vehicles.push(this.client_vehicles3)
+							} else {
+								this.updateClientData.vehicles.push(this.client_vehicles3)
+							}
+							this.innerVisible = false;
+							this.$message({
+								message: '添加成功！',
+								type: 'success'
+							});
+						} else {
+							return false;
+						}
+					});
+				},
+				//				closeObject(vehicles_1){
+				//					
+				//					if(vehicles_1){
+				//			        	this.$refs[vehicles_1].resetFields();
+				//			        }
+				//				},
+				//修改提交
+				updateSubmitForm(formName) {
+					let _this = this;
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							axios.put("http://localhost:8080/dzw_sys/api/client/updateClient", _this.updateClientData).then(function(resp) {
+								if(resp.data) {
+									_this.showClient();
+									_this.dialogVisible2 = false
+									_this.$message({
+										message: '修改成功！',
+										type: 'success'
+									});
+								} else {
+									_this.$message({
+										message: '修改失败！',
+										type: 'error'
+									});
+								}
+							})
+						} else {
+							return false;
+						}
+					});
+				},
+				//随机生成id
+				weiYiId() {
+					var s = [];
+					var hexDigits = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM";
+					for(var i = 0; i < 10; i++) {
+						s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+					}
+					s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+					s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+					s[8] = s[13] = s[18] = s[23];
+					var uuid = s.join("");
+					return uuid;
+				},
+				//新增页面关闭模态框
+				handleClose(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				//修改页面关闭模态框
+				handleClose2(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							this.updateClientData = {}
+							done();
+						})
+						.catch(_ => {});
+				},
+				//新增用户页面打开
+				addDialog() {
+					this.statisUpdate = 1
+					this.ruleForm = {
+						cId: this.weiYiId(),
+						cName: '',
+						detailedAddress: '',
+						linkman: '',
+						phone: '',
+						userType: '普通用户',
+						remark: '',
+						vehicles: []
+					}
+					this.dialogVisible = true
+
+				},
+				carInfosFormAdd2(formName) {
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							this.innerVisible = true
+							this.client_vehicles3 = {
+								clientid: this.updateClientData.cid,
+								license: '',
+								vehiclebrand: '',
+								model: '',
+								driver: '',
+								driverphone: '',
+								vehicleownership: '',
+								VIN: '',
+								engine: '',
+								enginebrand: '',
+								vehiclemodel: '',
+								mileage: '',
+								load: '',
+								carseries: '',
+								buydate: '',
+								registereddate: '',
+								citydue: '',
+								fueltype: '',
+								member: ''
+							}
+						} else {
+							return false;
+						}
+					});
+				},
+				//打开新增添加车资料页面
+				carInfosFormAdd(formName) {
+					this.$refs[formName].validate((valid) => {
+						if(valid) {
+							this.innerVisible = true
+							this.client_vehicles3 = {
+								clientid: this.ruleForm.cId,
+								license: '',
+								vehiclebrand: '',
+								model: '',
+								driver: '',
+								driverphone: '',
+								vehicleownership: '',
+								VIN: '',
+								engine: '',
+								enginebrand: '',
+								vehiclemodel: '',
+								mileage: '',
+								load: '',
+								carseries: '',
+								buydate: '',
+								registereddate: '',
+								citydue: '',
+								fueltype: '',
+								member: ''
+							}
+						} else {
+							return false;
+						}
+					});
+
+				}
+			},
+			//初始化方法
+			mounted() {
+				this.showClient()
+			}
+		})
+	</script>
+
+</html>

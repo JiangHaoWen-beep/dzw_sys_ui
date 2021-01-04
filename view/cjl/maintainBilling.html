@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>维修接车</title>
+		<style type="text/css">
+			* {
+				font-size: 14px;
+			}
+			
+			.el-col {
+				margin-top: 20px;
+			}
+			
+			#userinfo>span {
+				font-size: 12px;
+			}
+			
+			.demo-table-expand {
+				font-size: 0;
+			}
+			
+			.demo-table-expand label {
+				width: 90px;
+				color: #99a9bf;
+			}
+			
+			.demo-table-expand .el-form-item {
+				margin-right: 0;
+				margin-bottom: 0;
+				width: 50%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="billing" align="center">
+			<el-row id="head" type="flex" justify="space-between">
+				<el-col :span="6">
+					<div>
+						<span style="color: green;">业务类型：</span>
+						<el-select style="width: 120px;" v-model="value" size="small" placeholder="请选择">
+							<el-option value="站内维修">
+							</el-option>
+							<el-option value="站外维修">
+							</el-option>
+						</el-select>
+					</div>
+				</el-col>
+				<el-col :span="6">
+					<!--<el-button type="danger" size="small" @click="Billing(value)">维修开单</el-button>-->
+				</el-col>
+			</el-row>
+			<el-divider></el-divider>
+			<el-row type="flex" justify="center">
+				<el-col :span="6">
+					<el-autocomplete clearable size="small" class="inline-input" v-model="state1" :fetch-suggestions="querySearch" placeholder="请输入内容" @select="handleSelect"></el-autocomplete>
+					<br />
+					<br />
+					<div id="userinfo">
+						<span>车牌号:{{Vehicle.license}} </span> <span>品牌：{{Vehicle.enginebrand}}</span> <span>驾驶员：{{Vehicle.driver}} </span> <span>手机号：{{Vehicle.driverphone}}</span> <br />
+						<br /> <span>发动机品牌:{{Vehicle.enginebrand}}</span> <span>车型：{{Vehicle.carseries}} </span> <span>发动机品牌：{{Vehicle.engine}}</span> <span>上牌时间:{{Vehicle.registereddate}}</span>
+					</div>
+				</el-col>
+			</el-row><br />
+			<el-row type="flex" justify="center" v-show="value=='站内维修'">
+				<el-col>
+					<el-tabs v-model="activeName" @tab-click="handleClick">
+						<el-tab-pane label="今日维修" name="first">
+							<el-table :data="MaintenanceItemsByDay" style="width: 100%">
+								<el-table-column type="expand">
+									<template slot-scope="props">
+										<el-form label-position="left" inline class="demo-table-expand">
+											<el-form-item label="数量">
+												<span>{{ props.row.number }}</span>
+											</el-form-item>
+											<el-form-item label="价类">
+												<span>{{ props.row.priceclass }}</span>
+											</el-form-item>
+											<el-form-item label="单价">
+												<span>{{ props.row.unitprice}}</span>
+											</el-form-item>
+											<el-form-item label="技师结算价">
+												<span>{{ props.row.settlementprice }}</span>
+											</el-form-item>
+											<el-form-item label="故障描述">
+												<span>{{ props.row.errordesc }}</span>
+											</el-form-item>
+											<el-form-item label="故障原因">
+												<span>{{ props.row.errorcause }}</span>
+											</el-form-item>
+											<el-form-item label="维修班组">
+												<span>{{ props.row.themaintenancecrew }}</span>
+											</el-form-item>
+											<el-form-item label="作业人员">
+												<span>{{ props.row.busyworkgroup }}</span>
+											</el-form-item>
+											<el-form-item label="服务顾问">
+												<span>{{ props.row.server }}</span>
+											</el-form-item>
+											<el-form-item label="工单号">
+												<span>{{ props.row.workordernumber }}</span>
+											</el-form-item>
+											<el-form-item label="免单原因">
+												<span>{{ props.row.freeofchargefor }}</span>
+											</el-form-item>
+										</el-form>
+									</template>
+								</el-table-column>
+								<el-table-column label="项目编号" prop="oid">
+								</el-table-column>
+								<el-table-column label="项目名称" prop="oname">
+								</el-table-column>
+								<el-table-column label="金额" prop="money">
+								</el-table-column>
+							</el-table>
+						</el-tab-pane>
+						<el-tab-pane label="历史维修" name="second">
+							<el-table :data="MaintenanceItems" style="width: 100%">
+								<el-table-column type="expand">
+									<template slot-scope="props">
+										<el-form label-position="left" inline class="demo-table-expand">
+											<el-form-item label="数量">
+												<span>{{ props.row.number }}</span>
+											</el-form-item>
+											<el-form-item label="价类">
+												<span>{{ props.row.priceclass }}</span>
+											</el-form-item>
+											<el-form-item label="单价">
+												<span>{{ props.row.unitprice}}</span>
+											</el-form-item>
+											<el-form-item label="技师结算价">
+												<span>{{ props.row.settlementprice }}</span>
+											</el-form-item>
+											<el-form-item label="故障描述">
+												<span>{{ props.row.errordesc }}</span>
+											</el-form-item>
+											<el-form-item label="故障原因">
+												<span>{{ props.row.errorcause }}</span>
+											</el-form-item>
+											<el-form-item label="维修班组">
+												<span>{{ props.row.themaintenancecrew }}</span>
+											</el-form-item>
+											<el-form-item label="作业人员">
+												<span>{{ props.row.busyworkgroup }}</span>
+											</el-form-item>
+											<el-form-item label="服务顾问">
+												<span>{{ props.row.server }}</span>
+											</el-form-item>
+											<el-form-item label="工单号">
+												<span>{{ props.row.workordernumber }}</span>
+											</el-form-item>
+											<el-form-item label="免单原因">
+												<span>{{ props.row.freeofchargefor }}</span>
+											</el-form-item>
+										</el-form>
+									</template>
+								</el-table-column>
+								<el-table-column label="项目编号" prop="oid">
+								</el-table-column>
+								<el-table-column label="项目名称" prop="oname">
+								</el-table-column>
+								<el-table-column label="金额" prop="money">
+								</el-table-column>
+							</el-table>
+						</el-tab-pane>
+					</el-tabs>
+				</el-col>
+			</el-row>
+			<el-row type="flex" justify="center" v-show="value=='站外维修'">
+				<el-col :span="8">
+					<span style="color: cornflowerblue; font-size: 12px;">请选择派车的车辆</span>
+					<el-autocomplete clearable size="small " class="inline-input" v-model="state2" :fetch-suggestions="querySearch1" placeholder="请输入内容" @select="handleSelect1"></el-autocomplete>
+				</el-col>
+			</el-row>
+		</div>
+	</body>
+	<script>
+		var billing = new Vue({
+			el: "#billing",
+			data: {
+				//业务类型选项
+				value: '维修接车',
+				Vehicle: {},
+				MaintenanceItems: [],
+				MaintenanceItemsByDay: [],
+				time:"",
+				value: '站内维修',
+				//车牌输入框
+				restaurants: [],
+				state1: '',
+				//派车
+				restaurants1: [],
+				state2: '',
+
+				//标签页
+				activeName: 'first'
+								
+			},
+			methods: {
+				handleClick(tab, event) {
+					console.log(tab, event);
+				},
+				//车牌输入框方法
+				querySearch(queryString, cb) {
+					var restaurants = this.restaurants;
+					var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				},
+				createFilter(queryString) {
+					return(restaurant) => {
+						return(restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+					};
+				},
+				handleSelect(item) {
+					//console.log(item.value);
+					//alert(JSON.stringify(item.value));
+					let _This = this;
+					
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/license/${item.value}`).then(function(success) {
+						_This.Vehicle = success.data;					
+						console.log(JSON.stringify(_This.Vehicle));
+					}).catch(function(error) {
+						console.log(error);
+					});
+					//历史维修记录
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/carNum/${item.value}`).then(function(success) {
+						_This.MaintenanceItems = success.data;					
+						console.log(JSON.stringify(_This.MaintenanceItems));
+					}).catch(function(error) {
+						console.log(error);
+					});
+					//今日
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/dayAndLicense/${this.time}/${item.value}`).then(function(success) {
+						_This.MaintenanceItemsByDay = success.data;					
+						console.log(JSON.stringify(_This.MaintenanceItemsByDay));
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+
+				//派车输入框
+				querySearch1(queryString, cb) {
+					var restaurants1 = this.restaurants1;
+					var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants1;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				},
+				createFilter1(queryString) {
+					return(restaurant) => {
+						return(restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+					};
+				},
+				handleSelect1(item) {
+					console.log(item);
+				},
+				
+				//开单按钮点击
+				Billing(val){
+					if(val=="站内维修"){
+						index.addTab(index.editableTabsValue, val, 'wx001');
+					}else{
+						index.addTab(index.editableTabsValue, val, 'jy001');
+					}
+				}
+			},
+			mounted() {
+				axios.get(`http://127.0.0.1:8080/dzw_sys/api/vehicle/queryAll`).then(resp => {
+					resp.data.forEach(temp=>{
+						this.restaurants.push({"value":temp.license})
+					})
+				})
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/fieldOfVehicle/queryAll`).then(resp1 => {
+					resp1.data.forEach(temp1=>{
+						this.restaurants1.push({"value":temp1.carnumber})
+					})
+					})
+				var newDate = new Date();
+				this.time = newDate.getFullYear() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getDate();
+			}
+		})
+	</script>
+
+</html>

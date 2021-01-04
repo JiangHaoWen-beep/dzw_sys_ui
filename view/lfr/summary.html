@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>结算中心</title>
+		<style>
+			.clientCente {
+				background-color: #fafafa;
+			}
+			
+			h1 {
+				font-size: 25px;
+			}
+			
+			.sum_danhao {
+				width: 300px;
+			}
+			
+			#summaryApp {
+				zoom: 0.8;
+			}
+		</style>
+		<!--<link rel="stylesheet" href="../../css/element.css">-->
+	</head>
+
+	<body>
+		<div id="summaryApp">
+			<h1>结算中心</h1>
+			<div>
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="8">
+						完工时间：
+						<el-date-picker @change="dateTrue" value-format="yyyy-MM-dd" v-model="date1" :popper-append-to-body="false" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+						</el-date-picker>
+					</el-col>
+					<el-col :span="6">
+						结算状态：
+						<el-select :popper-append-to-body="false" @change="tiaojianCx()" v-model="CloseanaccountVO.zhuangtai" style="width: 160px;" placeholder="请选择">
+							<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+							</el-option>
+						</el-select>
+					</el-col>
+					<el-col :span="4">
+						<el-button type="primary" @click="queryWhere">查询</el-button>
+						<el-button type="success" v-if="jiesuanBtn" @click="settleAccounts2">结算</el-button>
+						<el-button type="success" v-else @click="settleAccounts">回滚</el-button>
+					</el-col>
+				</el-row>
+				<el-dialog title="前台结算" :visible.sync="dialogVisible" width="50%" :before-close="handleCloses1">
+					<el-row :gutter="24">
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>销售单号：</span>
+								<span style="font-weight: bold;" v-text="jiesuan.saleno">车主：</span>
+							</div>
+						</el-col>
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>车主：</span>
+								<label style="font-weight: bold;" v-text="jiesuan.customername">张三</label>
+							</div>
+						</el-col>
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>车牌号：</span>
+								<label style="font-weight: bold;" v-text="jiesuan.license">京A888</label>
+							</div>
+						</el-col>
+					</el-row>
+					<el-row :gutter="24">
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>车型：</span>
+								<label style="font-weight: bold;" v-text="jiesuan.vehiclemodel">迈巴赫</label>
+							</div>
+						</el-col>
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>单据类型：</span>
+								<label style="font-weight: bold;" v-text="jiesuan.receiptstype">2020-11-23 9:37:25</label>
+							</div>
+						</el-col>
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<span>完成时间：</span>
+								<label style="font-weight: bold;" v-text="jiesuan.timeofcompletion">2020-11-23 9:37:25</label>
+							</div>
+						</el-col>
+					</el-row>
+					<el-row :gutter="20">
+						<el-col :span="8">
+							<div class="grid-content bg-purple">
+								<h3>消费明细</h3>
+							</div>
+						</el-col>
+					</el-row>
+					<template>
+						<el-table :data="MaintenanceItems">
+							<el-table-column property="oid" label="项目编码"></el-table-column>
+							<el-table-column property="oname" label="项目名称"></el-table-column>
+							<el-table-column property="unitprice" label="项目价格"></el-table-column>
+						</el-table>
+					</template>
+					<br />
+					<el-row :gutter="24">
+						<h3 style="padding-left: 12px;">支付方式</h3>
+						<span style="padding-left: 40px;"></span>
+						<el-radio v-model="radios" label="1" v-if="clientSummary.usertype == '会员'" size="medium" border>余额支付</el-radio>
+						<el-radio v-model="radios" label="2" size="medium" border>支付宝支付</el-radio>
+						<el-radio v-model="radios" label="3" size="medium" border>现金支付</el-radio>
+					</el-row>
+					<el-row :gutter="24">
+						<el-col :span="5">
+							<span style="font-size: 20px;">应收金额：</span>
+							<label style="font-size: 20px;font-weight: bold;">{{jiesuan.clearingmoney}}</label>
+						</el-col>
+						<el-col :span="5">
+							<span style="font-size: 20px;">实收金额：</span>
+							<label style="font-size: 20px;font-weight: bold;color:red;" v-if="clientSummary.usertype == '员工'">{{jiesuan.clearingmoney * 0.85}}</label>
+							<label style="font-size: 20px;font-weight: bold;color:red;" v-if="clientSummary.usertype == '普通用户'">{{jiesuan.clearingmoney}}</label>
+							<label style="font-size: 20px;font-weight: bold;color:red;" v-if="clientSummary.usertype == '会员' && radios == '1'">{{jiesuan.clearingmoney * 0.9}}</label>
+							<label style="font-size: 20px;font-weight: bold;color:red;" v-if="clientSummary.usertype == '会员' && radios != '1'">{{jiesuan.clearingmoney}}</label>
+						</el-col>
+					</el-row>
+					<el-row style="margin-left: 300px;margin-top: 20px;">
+						<el-button type="primary" @click="jsSubmitForm('已结算')">确认结账</el-button>
+						<el-button @click="dialogVisible = false">取 消</el-button>
+					</el-row>
+
+				</el-dialog>
+				<br />
+				<el-dialog title="维修项目列表" :close-on-click-modal="false" :visible.sync="isShow" width="80%">
+					<el-table :data="MaintenanceItems" tooltip-effect="dark" height="400px">
+						<el-table-column prop="oid" label="项目编号">
+						</el-table-column>
+						<el-table-column prop="oname" label="项目名称" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="number" label="数量" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="priceclass" label="价类" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="unitprice" label="单价" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="money" label="金额" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="settlementprice" label="技师结算价" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="errordesc" label="故障描述" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="errorcause" label="故障原因" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="themaintenancecrew" label="维修班组" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="busyworkgroup" label="作业人员" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="server" label="服务顾问" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="workordernumber" label="工单号" show-overflow-tooltip>
+						</el-table-column>
+						<el-table-column prop="freeofchargefor" label="免单原因" show-overflow-tooltip>
+						</el-table-column>
+					</el-table>
+				</el-dialog>
+				<el-row :span="24">
+					<el-table ref="closeanaccount" :border="true" :data="closeanaccount" highlight-current-row @current-change="addCloseanaccount" style="width: 100%">
+						<el-table-column type="expand">
+							<template slot-scope="props">
+								<h3>订单明细：</h3>
+								<el-form label-position="left" label-width="100px" inline class="demo-table-expand">
+									<el-form-item label="销售单号：">
+										<div style="width: 100px;">{{ props.row.saleno }}</div>
+									</el-form-item>
+									<el-form-item label="单据状态：">
+										<div style="width: 100px;">{{ props.row.zhuangtai }}</div>
+									</el-form-item>
+									<el-form-item label="单据类型：">
+										<div style="width: 100px;">{{ props.row.receiptstype }}</div>
+									</el-form-item>
+									<br />
+									<el-form-item label="结算方式：">
+										<div style="width: 100px;">{{ props.row.clearing }}</div>
+									</el-form-item>
+									<el-form-item label="结算金额：">
+										<div style="width: 100px;">{{ props.row.clearingmoney }}</div>
+									</el-form-item>
+									<el-form-item label="负责人：">
+										<div style="width: 100px;">{{ props.row.principal }}</div>
+									</el-form-item>
+									<br />
+									<el-form-item label="车牌号:">
+										<div style="width: 100px;">{{ props.row.license }}</div>
+									</el-form-item>
+									<el-form-item label="客户名称:">
+										<div style="width: 100px;">{{ props.row.customername }}</div>
+									</el-form-item>
+									<el-form-item label="完工时间:">
+										<div style="width: 150px;">{{ props.row.timeofcompletion }}</div>
+									</el-form-item>
+									<br />
+									<el-form-item label="">
+										<el-button type="primary" @click="moutShow(props.row.saleno)">查看维修项目</el-button>
+									</el-form-item>
+								</el-form>
+							</template>
+						</el-table-column>
+						<el-table-column type="index" label="序号" width="150">
+						</el-table-column>
+						<el-table-column property="saleno" label="销售单号" width="200">
+						</el-table-column>
+						<el-table-column property="zhuangtai" label="单据状态" width="200">
+						</el-table-column>
+						<el-table-column property="receiptstype" label="单据类型" width="200">
+						</el-table-column>
+						<el-table-column property="clearing" label="结算方式" width="200">
+						</el-table-column>
+						<el-table-column property="clearingmoney" label="结算金额" width="200">
+						</el-table-column>
+						<el-table-column property="principal" label="负责人" width="200">
+						</el-table-column>
+						<el-table-column property="license" label="车牌号" width="200">
+						</el-table-column>
+						<el-table-column property="customername" label="客户名称" width="200">
+						</el-table-column>
+						<el-table-column property="frameno" label="车架号" width="200">
+						</el-table-column>
+						<el-table-column property="vehiclemodel" label="车型" width="200">
+						</el-table-column>
+						<el-table-column property="timeofcompletion" label="完工时间" width="200">
+						</el-table-column>
+					</el-table>
+				</el-row>
+				<el-row>
+					<el-col :span="20">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+
+					</el-col>
+				</el-row>
+			</div>
+			<el-dialog title="会员充值" :visible.sync="dialogVisibleMember" width="40%" :before-close="handleCloses1">
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="10">
+						<span style="color: red;">
+							余额不足，请充值！
+						</span>
+					</el-col>
+					<el-col :span="6">
+						&nbsp;
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+						<span style="line-height: 40px;">
+							账户金额：
+						</span>
+					</el-col>
+					<el-col :span="10">
+						<el-input v-model.number="memberMoney"></el-input>
+					</el-col>
+					<el-col :span="6">
+						&nbsp;
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="4">
+						&nbsp;
+					</el-col>
+					<el-col :span="4">
+						<span style="line-height: 40px;">
+							充值方式：
+						</span>
+					</el-col>
+					<el-col :span="10">
+						<el-radio v-model="radioss" label="1" size="medium" border>支付宝支付</el-radio>
+						<el-radio v-model="radioss" label="2" size="medium" border>现金支付</el-radio>
+					</el-col>
+					<el-col :span="6">
+						&nbsp;
+					</el-col>
+				</el-row>
+				<el-row>
+					<el-col :span="8">&nbsp;</el-col>
+					<el-col :span="16">
+						<el-button type="primary" @click="rechargeAdd">立即充值</el-button>
+						<el-button @click="dialogVisibleMember=false">关闭</el-button>
+					</el-col>
+				</el-row>
+			</el-dialog>
+		</div>
+	</body>
+	<!--<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/left.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/echarts.min.js"></script>-->
+	<script>
+		const summaryApp = new Vue({
+			el: '#summaryApp',
+			data: {
+				input3: '',
+				dialogVisibleMember: false,
+				clientSummary: {},
+				memberMoney: '',
+				memberRecharge: {},
+				shisum: '',
+				qian: 0,
+				radios: '3',
+				radioss: '1',
+				dateNow: '',
+				CloseanaccountVO: {
+					date1: '',
+					date2: '',
+					zhuangtai: '待结算',
+				},
+				date1: [],
+				isShow: false,
+				checkedJs: true,
+				closeanaccount: [],
+				//				{
+				//					id: 'id',
+				//					saleNo: '销售单号',
+				//					receiptsType: '单据类型',
+				//					clearing: '结算方式',
+				//					clearingMoney: '结算金额',
+				//					principal: '负责人',
+				//					license: '车牌号',
+				//					customerName: '客户名称',
+				//					frameNo: '车架号',
+				//					vehicleModel: '车型',
+				//					timeOfCompletion: '完工时间'
+				//				}
+				dialogVisible: false,
+				jiesuan: {},
+				clearingMoney: 0,
+				options: [{
+					value: '待结算',
+					label: '待结算'
+				}, {
+					value: '已结算',
+					label: '已结算',
+				}],
+				jiesuanBtn: true,
+				MaintenanceItems: []
+			},
+			methods: {
+				moutShow(ss) {
+					this.isShow = true
+					this.mout(ss)
+				},
+				huiyuan() {
+					axios.put("http://localhost:8080/dzw_sys/api/client/updateClient2", this.memberRecharge).then(function(resp) {})
+				},
+				handleCloses1(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				weiYiId() {
+					var s = [];
+					var hexDigits = "0123456789QWERTYUIOPASDFGHJKLZXCVBNM";
+					for(var i = 0; i < 10; i++) {
+						s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+					}
+					s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+					s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+					s[8] = s[13] = s[18] = s[23];
+					var uuid = s.join("");
+					return uuid;
+				},
+				mout(roddnumber) {
+					let _This = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/maintenanceItem/${roddnumber}`).then(function(success) {
+						_This.MaintenanceItems = success.data;
+						//_This.$alert(JSON.stringify(_This.MaintenanceItems));
+						_This.MaintenanceItems.forEach(function(i, obj) {
+							_This.totalSum = parseInt(i.money) + parseInt(i.money);
+						});
+						//totalCount = parseInt();
+						//_This.$alert(_This.totalSum);
+						sessionStorage.setItem("totalSum", _This.totalSum);
+					}).catch(function(error) {
+						console.log(error);
+					});
+				},
+				getNowTime() {
+					var now = new Date();
+					var year = now.getFullYear(); //得到年份
+					var month = now.getMonth(); //得到月份
+					var date = now.getDate(); //得到日期
+					month = month + 1;
+					month = month.toString().padStart(2, "0");
+					date = date.toString().padStart(2, "0");
+					var defaultDate = `${year}-${month}-${date}`;
+					return defaultDate;
+				},
+				dateTrue() {
+					this.jiesuan = {}
+					this.CloseanaccountVO.date1 = this.date1[0]
+					this.CloseanaccountVO.date2 = this.date1[1]
+					this.showList()
+				},
+				queryWhere() {
+					this.showList()
+				},
+				addCloseanaccount(data) {
+					if(data.clearingmoney != null && data.clearingmoney != 0) {
+						this.clearingMoney = data.clearingmoney
+					} else {
+						this.clearingMoney = 0
+					}
+					this.jiesuan = JSON.parse(JSON.stringify(data))
+				},
+				tiaojianCx() {
+					this.jiesuan = {}
+					this.showList()
+					if(this.CloseanaccountVO.zhuangtai == "待结算") {
+						this.jiesuanBtn = true
+					} else {
+						this.jiesuanBtn = false
+					}
+
+				},
+				rechargeAdd() {
+					let _this = this
+					if(this.memberMoney != '' && this.memberMoney > 999) {
+						this.memberRecharge.earnest += this.memberMoney
+					} else {
+						_this.$message({
+							message: '每次充值不能少于1000！',
+						});
+						return false;
+					}
+					if(this.radioss == '2') {
+						axios.put("http://localhost:8080/dzw_sys/api/client/updateClient2", this.memberRecharge).then(function(resp) {
+							if(resp.data) {
+								_this.dialogVisibleMember = false;
+								_this.settleAccounts2()
+								_this.$message({
+									message: '充值成功！',
+									type: 'success'
+								});
+							} else {
+								_this.$message({
+									message: '充值失败！',
+									type: 'error'
+								});
+							}
+						})
+					} else {
+						this.dialogVisibleMember = false;
+						window.sessionStorage.setItem("memberRecharge", JSON.stringify(this.memberRecharge))
+						window.open("http://localhost:8080/dzw_sys/api/pay/" + this.weiYiId() + "/" + this.memberMoney + "/be recharged successfully/huiyuanchongzhi", "_blank");
+					}
+				},
+				jsSubmitForm(js) {
+					let _this = this
+					this.jiesuan.zhuangtai = js;
+					if(js == "已结算") {
+						this.jiesuan.clearing = "现金"
+					} else {
+						this.jiesuan.clearing = ""
+					}
+					if(this.radios == '1') {
+						this.qian = parseFloat(this.jiesuan.clearingmoney * 0.9)
+						if(this.clientSummary.earnest < this.qian) {
+							this.dialogVisibleMember = true;
+							return false;
+						}
+					} else if(this.clientSummary.usertype == '员工') {
+						this.qian = parseFloat(this.jiesuan.clearingmoney * 0.85)
+					} else {
+						this.qian = parseFloat(this.jiesuan.clearingmoney)
+					}
+					if(this.radios == '2') {
+						window.open("http://localhost:8080/dzw_sys/api/pay/" + this.jiesuan.saleno + "/" + this.qian + "/The front desk and settlement/qiantaijiesuan", "_blank");
+						window.sessionStorage.setItem("panduan", false)
+						window.sessionStorage.setItem("jiesuan", JSON.stringify(this.jiesuan))
+						this.dialogVisible = false;
+						return false;
+					}
+					axios.put(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/closeanaccount/update`, this.jiesuan).then(function(resp) {
+						if(resp.data) {
+							if(js == "已结算") {
+								_this.$message({
+									message: '结算成功！',
+									type: 'success'
+								});
+								if(_this.radios=='1'){
+									_this.memberRecharge.earnest-=_this.qian
+									_this.huiyuan()
+								}
+								_this.dialogVisible = false;
+							} else {
+								_this.$message({
+									message: '回滚成功！',
+									type: 'success'
+								});
+							}
+							_this.showList()
+							_this.clearingMoney = 0
+						}
+					})
+				},
+				jsSubmitForm2(js) {
+					let _this = this
+					this.jiesuan.zhuangtai = js;
+					if(js == "已结算") {
+						this.jiesuan.clearing = "现金"
+					} else {
+						this.jiesuan.clearing = ""
+					}
+					axios.put(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/closeanaccount/update`, this.jiesuan).then(function(resp) {
+						if(resp.data) {
+							if(js == "已结算") {
+								_this.$message({
+									message: '结算成功！',
+									type: 'success'
+								});
+								if(_this.radios=='1'){
+									_this.memberRecharge.earnest-=_this.qian
+									_this.huiyuan()
+								}
+								_this.dialogVisible = false;
+							} else {
+								_this.$message({
+									message: '回滚成功！',
+									type: 'success'
+								});
+							}
+							_this.showList()
+							_this.clearingMoney = 0
+						}
+					})
+				},
+				handleCloses1(done) {
+					this.$confirm('确认关闭？')
+						.then(_ => {
+							done();
+						})
+						.catch(_ => {});
+				},
+				settleAccounts() {
+					if(JSON.stringify(this.jiesuan) != "{}") {
+						this.jsSubmitForm2("待结算")
+					} else {
+						this.$message('请选择要回滚的单！');
+					}
+
+				},
+				settleAccounts2() {
+					this.mout(this.jiesuan.saleno)
+					this.showClient(this.jiesuan.customername);
+					if(JSON.stringify(this.jiesuan) != "{}") {
+						this.dialogVisible = true
+					} else {
+						this.$message('请选择要结算的单！');
+					}
+
+				},
+				showClient(customername) {
+					let _this = this
+					axios.get(`http://localhost:8080/dzw_sys/api/client/selectByName/${customername}`).then(function(success) {
+						_this.clientSummary = success.data;
+						_this.memberRecharge = success.data;
+					})
+				},
+				deleteRow(index, rows) {
+					rows.splice(index, 1);
+				},
+				handleCurrentChange(ss) {
+
+				},
+				showList() {
+					let _this = this
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/closeanaccount/selectAll`, this.CloseanaccountVO).then(function(resp) {
+						_this.closeanaccount = resp.data
+					})
+				}
+			},
+			mounted() {
+				this.date1.push(this.getNowTime())
+				this.date1.push(this.getNowTime())
+				this.CloseanaccountVO.date1 = this.getNowTime()
+				this.CloseanaccountVO.date2 = this.getNowTime()
+				this.showList()
+			},
+			filters: {
+				yuangong(val) {
+					return val * 0.85;
+				}
+			}
+		})
+	</script>
+
+</html>

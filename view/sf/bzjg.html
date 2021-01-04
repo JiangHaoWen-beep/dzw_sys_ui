@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>班组技工</title>
+	</head>
+
+	<body>
+		<div id="bz">
+			<el-container>
+				<el-container>
+					<el-aside style="width:230px;">
+						<template>
+							<el-button @click="addTeam()" type="primary" size="mini">新增</el-button>
+							<el-button @click="updateTeam" type="warning" size="mini">修改</el-button>
+							<el-button @click="deleteTeam(person.teid)" type="danger" size="mini">删除</el-button><br /><br />
+							<el-input v-model="person.tename" class="nr" type="text" name="xment" size="small" /></el-input>
+							<el-table @current-change="fuzhi" :data="person1" ref="singleTable" highlight-current-row @current-change="handleCurrentChange">
+								<el-table-column label="班组">
+									<template slot-scope="temp">
+										<span @click="add(temp.row.teid)">{{temp.row.tename}}</span>
+									</template>
+								</el-table-column>
+							</el-table>
+						</template>
+					</el-aside>
+					<el-main>
+						<el-row>
+							<el-col :span="20">
+								<el-button @click="isShow=true" type="primary" size="mini">新增技工</el-button>
+								<el-dialog :before-close="handlerClose" @opened="handlerOpen" :visible.sync="isShow" title="新增技工" center>
+									<div id="cnty" v-loading="loading">
+									</div>
+								</el-dialog>
+								<!--<el-button @click="isShows=true" type="warning" size="mini">修改员工</el-button>
+								<el-dialog :before-close="handlerClose" @opened="handlerOpenn" :visible.sync="isShows" title="修改员工" center>
+									<div id="cntt" v-loading="loading">
+									</div>
+								</el-dialog>-->
+								<el-button @click="deleteaid(tableData.aid)" type="danger" size="mini">删除技工</el-button>
+							</el-col>
+						</el-row>
+						<el-table @row-click="scjg" :data="tableData.list" style="width:90%;" ref="singleTable" highlight-current-row @current-change="handleCurrentChange">
+							<!--@row-click="xg" -->
+							<el-table-column label="序号" type="index">
+								<template slot-scope="temp">
+									{{temp.$index+1}}
+								</template>
+							</el-table-column>
+							<el-table-column property="aname" label="技工名称">
+								<template slot-scope="temp">
+									{{temp.row.aname}}
+								</template>
+							</el-table-column>
+							<el-table-column property="asex" label="性别">
+								<template slot-scope="temp">
+									<template v-if="temp.row.asex=='0'">
+										男
+									</template>
+									<template v-if="temp.row.asex=='1'">
+										女
+									</template>
+								</template>
+							</el-table-column>
+							<el-table-column property="aphone" label="手机号码">
+								<template slot-scope="temp">
+									{{temp.row.aphone}}
+								</template>
+							</el-table-column>
+							<el-table-column property="tename" label="班组名称">
+								<template slot-scope="temp">
+									{{temp.row.tename}}
+								</template>
+							</el-table-column>
+						</el-table>
+						<br />
+						<div class="block">
+							<el-pagination :current-page="tableData.pageNum" @current-change="handleCurrentChange" :page-size="3" layout="total, prev, pager, next" :total=tableData.total>
+							</el-pagination>
+						</div>
+					</el-main>
+				</el-container>
+			</el-container>
+		</div>
+	</body>
+	<script>var bz = new Vue({
+	data() {
+		return {
+			loading: true,
+			isShow: false,
+			isShows: false,
+			person1: {
+
+			},
+			person: {
+				teid: '',
+				tename: ''
+			},
+			tableData: {},
+			currentRow: null,
+			teid: 0,
+			xg1: {}
+
+		}
+	},
+	methods: {
+		setCurrent(row) {
+			this.$refs.singleTable.setCurrentRow(row);
+		},
+		handleCurrentChange(val) {
+			this.goToPage(val, this.tableData.pageSize);
+		},
+		handlerClose(done) {
+			this.$confirm('是否关闭?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				done(); //关闭
+			}).catch(() => {
+				this.$message({
+					type: 'info',
+					message: '已取消关闭'
+				});
+			});
+		},
+		toPerson() {
+			let _this = this;
+			axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bzcx`).then(function(resp) {
+				_this.person1 = resp.data;
+			})
+		},
+		addTeam() {
+			let _this = this;
+			if(this.person.tename != "") {
+				axios.post("http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bzxz", this.person).then(function(resp) {
+					if(resp.data.code == "200") {
+						_this.$message({
+							message: '新增成功',
+							type: 'success'
+						})
+						_this.toPerson();
+					}
+				}).catch(function(e) {});
+			} else {
+				alert("文本框不能为空")
+			}
+
+		},
+		fuzhi(currentRow, oldCurrenRow) {
+			bz.person.teid = currentRow.teid;
+			bz.person.tename = currentRow.tename;
+		},
+		add(id) {
+			this.teid = id;
+			this.goToPage(1, 3)
+		},
+		deleteTeam(teid) {
+			let _this = this;
+			axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bz/${this.teid}`).then(function(resp) {
+				if(resp.data > 0) {
+					alert("该班组已有人选，不能进行删除")
+				} else {
+					axios.delete(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bzsc/${teid}`).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '移除成功',
+								type: 'success'
+							})
+							_this.toPerson();
+						}
+					}).catch(function(e) {});
+				}
+			}).catch(function(e) {
+				console.info(e);
+			});
+
+		},
+		updateTeam() {
+			let _this = this;
+			axios.put("http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bzxg/team", this.person).then(function(resp) {
+				if(resp.data.code == "200") {
+					_this.$message({
+						message: '修改成功',
+						type: 'success'
+					})
+					_this.toPerson();
+				}
+			}).catch(function(e) {});
+		},
+		goToPage(p, s) {
+			let _this = this;
+			axios.get(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/bzjg/${this.teid}/${p}/${s}`).then(function(resp) {
+				_this.tableData = resp.data;
+			}).catch(function(e) {
+				console.info(e);
+			});
+		},
+		add(id) {
+			this.teid = id;
+			this.goToPage(1, 3)
+		},
+		handlerOpen() {
+			$("#cnty").load("../TY/xzbz.html");
+		},
+		scjg(row) {
+			alert(row.aid)
+			this.xg1["aid"] = row.aid;
+			//alert(this.xg1["yid"])
+		},
+		deleteaid(aid) {
+			let _this = this;
+			var aid = bz.xg1["aid"];
+			axios.delete(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/team/jgsc/${aid}`).then(function(resp) {
+				if(resp.data.code == "200") {
+					_this.$message({
+						message: '移除成功',
+						type: 'success'
+					})
+					_this.goToPage(1, 3);
+				}
+			}).catch(function(e) {});
+		}
+	},
+	mounted() {
+		this.toPerson();
+		this.goToPage(1, 3);
+	}
+}).$mount("#bz");</script>
+
+</html>

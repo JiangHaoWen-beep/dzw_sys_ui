@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>人事-离职登记</title>
+	</head>
+	<body>
+		<div id="pw" class="pb">
+			<el-container>
+					<el-main>
+						<template>
+							<el-row :gutter="20">
+								<el-col>
+									<el-button @click="isShow=true" type="warning" size="mini">离职</el-button>
+									<el-dialog :before-close="handlerClose" @opened="handlerOpen" :visible.sync="isShow" title="离职登记" center>
+										<div id="cnt" v-loading="loading">
+										</div>
+									</el-dialog>
+									<el-button @click="updatePerson" type="primary" size="mini">回滚</el-button>
+								</el-col>
+							</el-row>
+							<el-table @row-click="hg" ref="singleTable" :data="tableData.list" highlight-current-row @current-change="handleCurrentChange" style="width: 100%">
+								<el-table-column property="bname" label="部门" width="120">
+								</el-table-column>
+								<el-table-column property="zname" label="职位" width="120">
+								</el-table-column>
+								<el-table-column property="yid" label="员工编号">
+								</el-table-column>
+								<el-table-column property="yname" label="姓名" width="120">
+								</el-table-column>
+								<el-table-column property="ysex" label="性别" width="120">
+									<template slot-scope="temp">
+										<template v-if="temp.row.ysex=='0'">
+											男
+										</template>
+										<template v-if="temp.row.ysex=='1'">
+											女
+										</template>
+									</template>
+								</el-table-column>
+								<el-table-column property="ldate" label="离职时间">
+								</el-table-column>
+								<el-table-column property="lreason" label="离职原因">
+								</el-table-column>
+							</el-table>
+							<br />
+							<div class="block">
+								<el-pagination :current-page="tableData.pageNum" @current-change="handleCurrentChange" :page-size="3" layout="total, prev, pager, next" :total=tableData.total>
+								</el-pagination>
+							</div>
+						</template>
+					</el-main>
+				</el-container>
+			</el-container>
+		</div>
+	</body>
+	<script>
+		var ppp = new Vue({
+			data() {
+				return {
+					loading:true,
+					isShow:false,
+					tableData: {},
+					person: {},
+					currentRow: null,
+					yid:''
+
+				}
+			},
+			methods: {
+				setCurrent(row) {
+					this.$refs.singleTable.setCurrentRow(row);
+				},
+				handleCurrentChange(val) {
+					this.goToPage(val, this.tableData.pageSize);
+				},
+				handlerClose(done) {
+					this.$confirm('是否关闭?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						done(); //关闭
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				},
+				handlerOpen() {
+					$("#cnt").load("../TY/xzlz.html");
+				},
+				goToPage(p, s) {
+					let _this = this;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/t/${p}/${s}`).then(function(resp) {
+						_this.tableData = resp.data;
+					}).catch(function(e) {
+						console.info(e);
+					});
+				},
+				updatePerson() {
+					let _this = this;
+					axios.put(`http://127.0.0.1:8080/dzw_sys/ty/api/employee/hg/${this.yid}`).then(function(resp) {
+						if(resp.data.code == "200") {
+							_this.$message({
+								message: '回滚成功',
+								type: 'success'
+							})
+							_this.goToPage(1,3);
+						}
+					}).catch(function(e) {});
+				},
+				hg(row){
+					//alert(row.yid)
+					this.yid=row.yid;
+					//alert(this.yid)
+				}
+			},
+			mounted() {
+				this.goToPage(1,3);
+			}
+
+		}).$mount("#pw");
+	</script>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>职位权限</title>
+		<style>
+			.el-dialog {
+				position: relative;
+				margin: 0 auto 50px;
+				border-radius: 2px;
+				-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+				box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+				width: 20%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="power" align="center">
+			<el-table :data="page.list" border style="width: 70%">
+				<el-table-column property="zid" label="岗位编号">
+				</el-table-column>
+				<el-table-column property="zname" label="岗位名称">
+				</el-table-column>
+				<el-table-column label="操作">
+					<template slot-scope="temp">
+						<el-button type="primary" size="mini" @click="showDialog(temp.row.zid)">设置权限</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+			<div class="block">
+				<el-pagination layout="prev, pager, next" @current-change="pageChange" :total="page.pages*10">
+				</el-pagination>
+			</div>
+
+			<el-dialog title="权限" :visible.sync="dialogFormVisible">
+				<el-tree :data="tree" ref="tree" show-checkbox node-key="id" :default-checked-keys="perm.fidList" :props="tree">
+				</el-tree>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="dialogFormVisible = false">取 消</el-button>
+					<el-button type="primary" @click="savePower">确 定</el-button>
+				</div>
+			</el-dialog>
+
+		</div>
+	</body>
+	<script>
+		var power = new Vue({
+			el: "#power",
+			data() {
+				return {
+					page: [],
+					tree: [],
+					perm: {
+						rid: 0,
+						fidList: [],
+						createby: JSON.parse(sessionStorage.getItem("EMPLOYEE")).yname
+					},
+					dialogFormVisible: false,
+				}
+			},
+			methods: {
+				toPerson(p, s) {
+					axios.get(`http://127.0.0.1:8080/dzw_sys/ty/api/postb/o/${p}/${s}`).then(resp => {
+						this.page = resp.data;
+					})
+				},
+				pageChange(val) {
+					this.toPerson(val, this.page.pageSize);
+				},
+				showDialog(rid) {
+					this.perm.rid = rid;
+					axios.get(`http://127.0.0.1:8080/dzw_sys/api/Functions/${rid}`).then(resp => {
+						this.perm.fidList = resp.data;
+						this.dialogFormVisible = true;
+					});
+				},
+				savePower() {
+					this.perm.fidList = this.$refs.tree.getCheckedKeys();
+					let parentKeys = [];
+					for(i = 0; i < this.tree.length; i++) {
+						parentKeys.push(this.tree[i].id);
+					}
+					for(i = 0; i < parentKeys.length; i++) {
+						for(j = 0; j < this.perm.fidList.length; j++) {
+							if(parentKeys[i] == this.perm.fidList[j]) {
+								this.perm.fidList.splice(j, 1);
+							}
+						}
+					}
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/Perms/Perm`, this.perm).then(resp => {
+						if(resp.data.code == "200") {
+							this.$alert("修改成功")
+							this.dialogFormVisible = false;
+						} else {
+							this.$alert("修改失败")
+						}
+					})
+
+				}
+			},
+			watch: {
+				dialogFormVisible: {
+					handler(val) {
+						if(!val) {
+							this.$refs.tree.setCheckedKeys([]);
+						}
+					}
+				}
+			},
+			mounted() {
+				this.toPerson(1, 3);
+				axios.get(`http://127.0.0.1:8080/dzw_sys/api/Functions`).then(resp => {
+					this.tree = resp.data;
+				});
+			}
+		})
+	</script>
+
+</html>

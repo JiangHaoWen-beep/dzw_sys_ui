@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>充值成功!</title>
+		<link rel="stylesheet" href="../../css/element.css">
+	</head>
+
+	<body>
+		<div id="successfullyApp">
+			<h1>充值成功！</h1>
+		</div>
+	</body>
+	<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/element.js"></script>
+	<script type="text/javascript" src="../../js/jquery-1.12.4.js"></script>
+	<script type="text/javascript" src="../../js/left.js"></script>
+	<script type="text/javascript" src="../../js/axios_cfg.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/echarts.min.js"></script>
+	<script>
+		new Vue({
+			el: '#successfullyApp',
+			data: {
+
+			},
+			methods: {
+				updateClient() {
+					let _this = this
+					axios.put("http://localhost:8080/dzw_sys/api/client/updateClient2", JSON.parse(window.sessionStorage.getItem("memberRecharge"))).then(function(resp) {
+						if(resp.data) {
+							_this.$message({
+								message: '充值成功！',
+								type: 'success'
+							});
+						} else {
+							_this.$message({
+								message: '充值失败！',
+								type: 'error'
+							});
+						}
+					})
+				},
+				account() {
+					let _this=this
+					axios.put("http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/closeanaccount/update", JSON.parse(window.sessionStorage.getItem("jiesuan"))).then(function(resp) {
+						if(resp.data) {
+							_this.$message({
+								message: '结算成功！',
+								type: 'success'
+							});
+						} else {
+							_this.$message({
+								message: '结算失败！',
+								type: 'error'
+							});
+						}
+					})
+				}
+			},
+			mounted() {
+				if(window.sessionStorage.getItem("panduan")=='true') {
+					this.updateClient();
+				} else {
+					this.account();
+				}
+
+			}
+		})
+	</script>
+
+</html>

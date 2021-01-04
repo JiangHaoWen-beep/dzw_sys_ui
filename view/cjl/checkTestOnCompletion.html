@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>竣工检验</title>
+	</head>
+	
+	<body>
+		<div id="checkTestOnCompletion">
+			<template>
+			  <el-radio v-model="selecttypeofdocument" label="1">合格完工</el-radio>
+			  <el-radio v-model="selecttypeofdocument" label="2">不合格完工</el-radio><span>已返工{{testOnCompletion.numberofrework}}次</span>
+			  <el-button type="success" icon="el-icon-check" @click="modifyTestOnCompletion" circle></el-button>
+			<el-form :inline="true" :model="testOnCompletion" class="demo-form-inline">
+				<el-form-item label="预计完工时间">
+					<!--<el-input v-model="RepairBill.timeofcompletion" placeholder="完工时间"></el-input>-->
+					<div class="block">
+						<el-date-picker v-model="testOnCompletion.expectedcompletion" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+						</el-date-picker>
+					</div>
+				</el-form-item>
+				<el-form-item label="返工原因">
+					<template>
+						<el-select v-model="testOnCompletion.reworkreason" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in reworkreasonList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="实际完工时间">
+					<!--<el-input v-model="RepairBill.timeofcompletion" placeholder="完工时间"></el-input>-->
+					<div class="block">
+						<el-date-picker v-model="testOnCompletion.timeofcompletion" type="datetime" value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间">
+						</el-date-picker>
+					</div>
+				</el-form-item>
+				<el-form-item label="误工原因">
+					<template>
+						<el-select v-model="testOnCompletion.delaysreason" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in reworkreasonList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>
+				<el-form-item label="处罚金额">
+					<el-input v-model="testOnCompletion.penaltyamount" placeholder="处罚金额"></el-input>
+				</el-form-item>
+				<el-form-item label="质检员">
+					<template>
+						<el-select v-model="testOnCompletion.principal" :popper-append-to-body="false" placeholder="请选择">
+							<el-option v-for="item in principalList" :key="item.values" :label="item.name" :value="item.values">
+							</el-option>
+						</el-select>
+					</template>
+				</el-form-item>				
+			</el-form>		
+			</template>
+		</div>				
+	</body>
+	
+	<script type="text/javascript">
+		checkTestOnCompletion = new Vue({
+			el:"#checkTestOnCompletion",
+			data(){
+				return{
+					 testOnCompletion:{
+					 	repairorder:"",
+					 	typeofdocument:"",
+					 	businesstype:"",
+					 	constructiondivisions:"",
+					 	ownername:"",
+					 	licenseplatenumber:"",
+					 	cartype:"",
+					 	vin:"",
+					 	pickupcartime:"",
+					 	expectedcompletion:"",
+					 	timeofcompletion:"",
+					 	delaysreason:"",
+					 	numberofrework:"",
+					 	penaltyamount:"",
+					 	reworkreason:"",
+					 	principal:"",
+					 	theDocumentsState:""
+					 },
+					 selecttypeofdocument:"1"
+					 ,
+					 reworkreasonList: [{
+						values: "reason01",
+						name: "原因一"
+					}, {
+						values: "reason02",
+						name: "原因二"
+					}, {
+						values: "reason03",
+						name: "原因三"
+					}],
+					principalList:[{
+						values: "server01",
+						name: "大大熊"
+					},{
+						values: "server02",
+						name: "大大喵"
+					},{
+						values: "server03",
+						name: "小小喵"
+					}],
+					closeanaccount:{
+						id:"",
+						saleno:"",
+						receiptstype:"",
+						clearing:"",
+						clearingmoney:"",
+						principal:"",
+						license:"",
+						customername:"",
+						frameno:"",
+						vehiclemodel:"",
+						timeofcompletion:"",
+						zhuangtai:"",
+						haveread:"未读"
+					}
+				}
+			},methods:{
+				modifyTestOnCompletion(){
+					if(this.selecttypeofdocument=="1"){
+						this.testOnCompletion.thedocumentsstate = "完工";
+					}else{
+						this.testOnCompletion.thedocumentsstate = "待结算";
+						this.testOnCompletion.numberofrework+=1;
+					}
+					//alert(JSON.stringify(this.testOnCompletion));
+					//alert(this.selecttypeofdocument);
+					let _This = this;
+					axios.put(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/testOnCompletion/modify`, this.testOnCompletion).then(function(success) {
+						if(success.data == 1) {
+							
+							if(_This.selecttypeofdocument=="1"){
+								_This.addCloseAnAccount();
+							}else if(_This.selecttypeofdocument=="2"){
+								//offSiteRescueSheet.isShowTwo = false;
+								//alert("s");
+								_This.addCloseAnAccount();
+							}
+							//_This.$alert("success");
+							/*if(sessionStorage.getItem("typeOfDocument")=="救援"){
+								//offSiteRescueSheet.getmaintenanceItemInfosByWorkOrderNum();
+								offSiteRescueSheet.isShowTwo = false;
+							}else if(sessionStorage.getItem("typeOfDocument")=="维修"){
+								//repairBill.getmaintenanceItemInfosByWorkOrderNum();
+								repairBill.isShowTwo = false;
+							}*/				
+						} else {
+							_This.$alert("error");
+						}
+					})
+				},
+				addCloseAnAccount(){
+					let _This = this;
+					_This.closeanaccount.saleno = _This.testOnCompletion.repairorder;
+					_This.closeanaccount.receiptstype = _This.testOnCompletion.typeofdocument;
+					_This.closeanaccount.clearing = "现金";
+					_This.closeanaccount.zhuangtai="已结算";
+					_This.closeanaccount.clearingmoney = sessionStorage.getItem("totalSum");
+					_This.closeanaccount.principal = _This.testOnCompletion.principal;
+					_This.closeanaccount.license = _This.testOnCompletion.licenseplatenumber;
+					_This.closeanaccount.customername = _This.testOnCompletion.ownername;
+					_This.closeanaccount.frameno = _This.testOnCompletion.vin;
+					_This.closeanaccount.vehiclemodel = _This.testOnCompletion.cartype;
+					_This.closeanaccount.timeofcompletion = _This.testOnCompletion.timeofcompletion;
+					//_This.$alert(JSON.stringify(_This.closeanaccount));
+					//return false;
+					axios.post(`http://127.0.0.1:8080/dzw_sys/api/dzw_Sys/cwl/closeanaccount/add`, this.closeanaccount).then(function(success) {
+						if(success.data == 1) {
+							_This.$alert("success");
+							if(sessionStorage.getItem("typeOfDocument")=="救援"){
+								//offSiteRescueSheet.getmaintenanceItemInfosByWorkOrderNum();
+								offSiteRescueSheet.isShowTwo = false;
+							}else if(sessionStorage.getItem("typeOfDocument")=="维修"){
+								//repairBill.getmaintenanceItemInfosByWorkOrderNum();
+								repairBill.isShowTwo = false;
+							}
+						} else {
+							_This.$alert("error");
+						}
+					})
+				}
+			},mounted(){
+				this.testOnCompletion = JSON.parse(sessionStorage.getItem("testOnCompletion"));
+				//alert(JSON.stringify(this.testOnCompletion));
+			}
+		});
+	</script>
+</html>
